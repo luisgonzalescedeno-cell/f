@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Examen de Auditoría</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --background: #f4f7f6;
+            --card: #ffffff;
+            --text: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            height: 10px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--secondary);
+            transition: width 0.3s ease;
+        }
+
+        .question-card {
+            display: none;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        .question-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 18px;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .option-btn:hover {
+            background-color: #e2e6ea;
+            border-color: #dae0e5;
+        }
+
+        .option-btn.selected {
+            border-color: var(--secondary);
+            background-color: #ebf5fb;
+        }
+
+        .option-btn.correct {
+            background-color: #d4edda !important;
+            border-color: var(--success) !important;
+            color: #155724;
+            font-weight: bold;
+        }
+
+        .option-btn.incorrect {
+            background-color: #f8d7da !important;
+            border-color: var(--danger) !important;
+            color: #721c24;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+            font-size: 0.95rem;
+        }
+
+        .feedback.correct {
+            display: block;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            display: block;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .results-container {
+            display: none;
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 15px 0;
+        }
+
+        .btn-restart {
+            background-color: var(--success);
+            color: white;
+            margin-top: 15px;
+        }
+
+        .btn-restart:hover {
+            background-color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Simulador de Examen</h1>
+    <p class="subtitle">Auditoría y Planificación Informatica</p>
+
+    <div class="progress-bar-container" id="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <!-- Preguntas -->
+    <div id="quiz-container"></div>
+
+    <!-- Resultados -->
+    <div class="results-container" id="results-container">
+        <h2>Examen Finalizado</h2>
+        <p>Tu puntuación es:</p>
+        <div class="score-display" id="score-text">0 / 0</div>
+        <p id="feedback-message"></p>
+        <button class="btn btn-restart" onclick="restartQuiz()">Volver a intentar</button>
+    </div>
+
+    <!-- Botones de Navegación -->
+    <div class="controls" id="controls">
+        <button class="btn btn-primary" id="prev-btn" onclick="prevQuestion()" disabled>Anterior</button>
+        <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()">Siguiente</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        {
+            question: "1. ¿Cuál es el concepto principal de una auditoría?",
+            options: [
+                "A) Un proceso para sancionar financieramente a los empleados de una empresa.",
+                "B) Un proceso de revisión y evaluación que permite comprobar información, procesos, controles o actividades.",
+                "C) Una reunión para elaborar nuevos presupuestos de ventas.",
+                "D) La instalación de programas de computadoras e infraestructura de red."
+            ],
+            correct: 1,
+            explanation: "Auditoría es un proceso de revisión y evaluación para comprobar información, controles o actividades."
+        },
+        {
+            question: "2. ¿Cuál es el objetivo de una auditoría realizada por un auditor externo?",
+            options: [
+                "A) Revisar internamente para mejorar únicamente los inventarios cotidianos.",
+                "B) Emitir una opinión profesional e independiente sobre la información auditada.",
+                "C) Redactar las políticas internas del departamento de recursos humanos.",
+                "D) Reemplazar al personal de la administración en sus funciones diarias."
+            ],
+            correct: 1,
+            explanation: "La auditoría externa la realiza un auditor independiente para emitir una opinión independiente sobre la información."
+        },
+        {
+            question: "3. Las Normas de Información Financiera (NIF) sirven para:",
+            options: [
+                "A) Sancionar los accesos no autorizados a las bases de datos.",
+                "B) Establecer un cronograma de trabajo técnico dentro de la organización.",
+                "C) Establecer cómo se debe preparar y presentar la información financiera de una empresa.",
+                "D) Definir los tipos de virus informáticos que afectan a la empresa."
+            ],
+            correct: 2,
+            explanation: "NIF = normas que establecen cómo preparar y presentar la información financiera."
+        },
+        {
+            question: "4. Según la NIA 705, ¿de qué trata esta norma internacional?",
+            options: [
+                "A) Del mantenimiento físico de los servidores.",
+                "B) De las modificaciones a la opinión del auditor en su informe.",
+                "C) De la contratación del personal de auditoría interna.",
+                "D) De los procedimientos de conteo físico del inventario."
+            ],
+            correct: 1,
+            explanation: "NIA 705 trata sobre las modificaciones a la opinión del auditor en su informe (opinión modificada)."
+        },
+        {
+            question: "5. ¿Cuál es la función principal de un Control Preventivo?",
+            options: [
+                "A) Solucionar un problema que ya ocurrió.",
+                "B) Encontrar y reportar irregularidades una vez sucedidas.",
+                "C) Actuar antes de que ocurra un problema con el objetivo de evitarlo.",
+                "D) Investigar faltantes en un inventario."
+            ],
+            correct: 2,
+            explanation: "Preventivo actúa antes del problema para evitarlo (Preventivo = evita)."
+        },
+        {
+            question: "6. Un ejemplo claro de Control Detectivo es:",
+            options: [
+                "A) Exigir usuario y contraseña para ingresar al sistema.",
+                "B) Revisar los registros de acceso de un sistema para detectar ingresos no autorizados.",
+                "C) Bloquear una cuenta de usuario después de una intrusión.",
+                "D) Cambiar los permisos de un archivo infectado."
+            ],
+            correct: 1,
+            explanation: "Control detectivo busca encontrar situaciones irregulares, como revisar registros de acceso para encontrar accesos no autorizados."
+        },
+        {
+            question: "7. Si una empresa detecta una falla en los accesos a sus sistemas, bloquea la cuenta afectada y corrige los permisos, está aplicando un control:",
+            options: [
+                "A) Preventivo.",
+                "B) Detectivo.",
+                "C) Correctivo.",
+                "D) Planificado."
+            ],
+            correct: 2,
+            explanation: "El control Correctivo actúa después de detectar el problema y sirve para solucionarlo (Correctivo = soluciona)."
+        },
+        {
+            question: "8. En la planificación de una auditoría informática, ¿qué define el 'Alcance'?",
+            options: [
+                "A) La lista de profesionales que integran el equipo auditor.",
+                "B) El propósito general que desea alcanzar la auditoría.",
+                "C) Los límites de la auditoría, indicando qué elementos serán revisados y cuáles no.",
+                "D) El software específico que se comprará para la evaluación."
+            ],
+            correct: 2,
+            explanation: "Alcance define los límites de la auditoría: hasta dónde llega y qué se va a revisar."
+        },
+        {
+            question: "9. Si un auditor indica que evaluará los datos comprendidos desde enero hasta junio de 2026, está definiendo el:",
+            options: [
+                "A) Periodo de revisión.",
+                "B) Equipo auditor.",
+                "C) Control detectivo.",
+                "D) Procedimiento de prueba."
+            ],
+            correct: 0,
+            explanation: "El periodo de revisión determina el lapso de tiempo (desde cuándo hasta cuándo) en el que se analizará la información."
+        },
+        {
+            question: "10. ¿Qué elemento de la planificación busca determinar las posibles amenazas que afecten la seguridad, integridad o confidencialidad?",
+            options: [
+                "A) Cronograma de actividades.",
+                "B) Identificación de riesgos.",
+                "C) Recurso documental.",
+                "D) Entidad o área a auditar."
+            ],
+            correct: 1,
+            explanation: "Identificación de riesgos determina posibles problemas o amenazas (acceso no autorizado, pérdida de datos, etc.)."
+        },
+        {
+            question: "11. ¿Qué es el Cronograma de Actividades?",
+            options: [
+                "A) El conjunto de profesionales encargados de emitir la opinión.",
+                "B) La lista detallada de normas financieras aplicables.",
+                "C) Una planificación organizada de las tareas indicando fechas, responsables y tiempos.",
+                "D) El presupuesto monetario total de la organización."
+            ],
+            correct: 2,
+            explanation: "El cronograma organiza tareas con fechas, responsables y tiempos de ejecución (qué se hace y cuándo)."
+        },
+        {
+            question: "12. En un programa de auditoría, el concepto de 'Procedimiento' corresponde a:",
+            options: [
+                "A) Con qué documento voy a comprobar la información.",
+                "B) La actividad o revisión específica que realizará el auditor.",
+                "C) Lo que el auditor espera encontrar al finalizar la revisión.",
+                "D) La norma internacional aplicable a la empresa."
+            ],
+            correct: 1,
+            explanation: "Procedimiento es la actividad o revisión específica que realizará el auditor (Procedimiento = qué reviso)."
+        },
+        {
+            question: "13. ¿Qué representa la 'Evidencia requerida' en el programa de auditoría?",
+            options: [
+                "A) La forma o método utilizado para hacer la revisión.",
+                "B) La información, documento o registro necesario para comprobar lo que se revisa.",
+                "C) La sanción aplicada tras encontrar una falta.",
+                "D) El tiempo en días que durará la auditoría."
+            ],
+            correct: 1,
+            explanation: "Evidencia es la información o documento con el que el auditor comprueba lo que está revisando (Evidencia = con qué compruebo)."
+        },
+        {
+            question: "14. Inspección, prueba de cumplimiento, observación y análisis son ejemplos de:",
+            options: [
+                "A) Resultados esperados.",
+                "B) Tipos de controles correctivos.",
+                "C) Técnicas de auditoría.",
+                "D) Tipos de opiniones modificadas."
+            ],
+            correct: 2,
+            explanation: "Técnica de auditoría es la forma o método que utiliza el auditor para revisar y obtener evidencia."
+        },
+        {
+            question: "15. Si el procedimiento es 'Revisar respaldos', la técnica es 'Observación' y la evidencia es 'Reportes de backup', el RESULTADO ESPERADO es:",
+            options: [
+                "A) Usuarios autorizados.",
+                "B) Contraseñas seguras.",
+                "C) Información protegida.",
+                "D) Datos de inventario corregidos."
+            ],
+            correct: 2,
+            explanation: "Para la revisión de respaldos mediante reportes de backup, el resultado esperado es contar con información protegida."
+        }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let userAnswers = new Array(questions.length).fill(null);
+
+    const quizContainer = document.getElementById('quiz-container');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const progressBar = document.getElementById('progress-bar');
+
+    function renderQuiz() {
+        quizContainer.innerHTML = '';
+        questions.forEach((q, index) => {
+            const card = document.createElement('div');
+            card.className = `question-card ${index === 0 ? 'active' : ''}`;
+            card.id = `q-${index}`;
+
+            const title = document.createElement('div');
+            title.className = 'question-title';
+            title.innerText = q.question;
+            card.appendChild(title);
+
+            const optionsContainer = document.createElement('div');
+            optionsContainer.className = 'options-container';
+
+            q.options.forEach((opt, optIdx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => selectOption(index, optIdx);
+                optionsContainer.appendChild(btn);
+            });
+
+            card.appendChild(optionsContainer);
+
+            const feedback = document.createElement('div');
+            feedback.className = 'feedback';
+            feedback.id = `feedback-${index}`;
+            card.appendChild(feedback);
+
+            quizContainer.appendChild(card);
+        });
+        updateProgress();
+    }
+
+    function selectOption(questionIdx, optionIdx) {
+        if (userAnswers[questionIdx] !== null) return; // Ya respondida
+
+        userAnswers[questionIdx] = optionIdx;
+        const q = questions[questionIdx];
+        const card = document.getElementById(`q-${questionIdx}`);
+        const buttons = card.querySelectorAll('.option-btn');
+        const feedback = document.getElementById(`feedback-${questionIdx}`);
+
+        buttons.forEach((btn, idx) => {
+            btn.disabled = true;
+            if (idx === q.correct) {
+                btn.classList.add('correct');
+            }
+            if (idx === optionIdx && optionIdx !== q.correct) {
+                btn.classList.add('incorrect');
+            }
+        });
+
+        if (optionIdx === q.correct) {
+            score++;
+            feedback.innerText = "¡Correcto! " + q.explanation;
+            feedback.className = "feedback correct";
+        } else {
+            feedback.innerText = "Incorrecto. " + q.explanation;
+            feedback.className = "feedback incorrect";
+        }
+    }
+
+    function showQuestion(index) {
+        document.querySelectorAll('.question-card').forEach((card, idx) => {
+            card.classList.toggle('active', idx === index);
+        });
+
+        prevBtn.disabled = index === 0;
+        
+        if (index === questions.length - 1) {
+            nextBtn.innerText = "Finalizar";
+        } else {
+            nextBtn.innerText = "Siguiente";
+        }
+
+        updateProgress();
+    }
+
+    function nextQuestion() {
+        if (currentQuestion < questions.length - 1) {
+            currentQuestion++;
+            showQuestion(currentQuestion);
+        } else {
+            showResults();
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            showQuestion(currentQuestion);
+        }
+    }
+
+    function updateProgress() {
+        const progress = ((currentQuestion + 1) / questions.length) * 100;
+        progressBar.style.width = `${progress}%`;
+    }
+
+    function showResults() {
+        document.getElementById('quiz-container').style.display = 'none';
+        document.getElementById('controls').style.display = 'none';
+        document.getElementById('progress-container').style.display = 'none';
+
+        const resultsContainer = document.getElementById('results-container');
+        resultsContainer.style.display = 'block';
+
+        const scoreText = document.getElementById('score-text');
+        scoreText.innerText = `${score} / ${questions.length}`;
+
+        const percentage = (score / questions.length) * 100;
+        const feedbackMsg = document.getElementById('feedback-message');
+
+        if (percentage >= 80) {
+            feedbackMsg.innerText = "¡Excelente trabajo! Tienes dominados los conceptos de la guía de auditoría.";
+            feedbackMsg.style.color = "var(--success)";
+        } else if (percentage >= 60) {
+            feedbackMsg.innerText = "Buen intento. Repasa un poco más los conceptos clave para asegurar una mejor nota.";
+            feedbackMsg.style.color = "var(--secondary)";
+        } else {
+            feedbackMsg.innerText = "Necesitas estudiar más. Revisa nuevamente la guía de repaso y vuelve a intentarlo.";
+            feedbackMsg.style.color = "var(--danger)";
+        }
+    }
+
+    function restartQuiz() {
+        currentQuestion = 0;
+        score = 0;
+        userAnswers = new Array(questions.length).fill(null);
+
+        document.getElementById('quiz-container').style.display = 'block';
+        document.getElementById('controls').style.display = 'flex';
+        document.getElementById('progress-container').style.display = 'block';
+        document.getElementById('results-container').style.display = 'none';
+
+        renderQuiz();
+        showQuestion(0);
+    }
+
+    // Inicializar quiz
+    renderQuiz();
+</script>
+
+</body>
+</html>
