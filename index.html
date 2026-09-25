@@ -3,51 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador Examen de Auditoría</title>
+    <title>Simulador Avanzado de Auditoría</title>
     <style>
         :root {
-            --primary: #2c3e50;
-            --secondary: #3498db;
-            --success: #2ecc71;
-            --danger: #e74c3c;
-            --background: #f4f7f6;
+            --primary: #1e293b;
+            --secondary: #2563eb;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --background: #f8fafc;
             --card: #ffffff;
-            --text: #333333;
+            --text: #0f172a;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: var(--background);
             color: var(--text);
-            line-height: 1.6;
+            line-height: 1.5;
             margin: 0;
             padding: 20px;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 850px;
             margin: 0 auto;
             background: var(--card);
-            padding: 30px;
+            padding: 35px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
         }
 
         h1 {
             color: var(--primary);
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
+            font-size: 1.8rem;
         }
 
         p.subtitle {
             text-align: center;
-            color: #666;
+            color: #64748b;
             margin-bottom: 25px;
+            font-size: 0.95rem;
         }
 
         .progress-bar-container {
             width: 100%;
-            background-color: #e0e0e0;
+            background-color: #e2e8f0;
             border-radius: 10px;
             height: 10px;
             margin-bottom: 25px;
@@ -70,10 +72,10 @@
         }
 
         .question-title {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
             color: var(--primary);
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .options-container {
@@ -83,73 +85,71 @@
         }
 
         .option-btn {
-            background-color: #f8f9fa;
-            border: 2px solid #e9ecef;
+            background-color: #f8fafc;
+            border: 2px solid #e2e8f0;
             border-radius: 8px;
-            padding: 12px 18px;
-            font-size: 1rem;
+            padding: 14px 18px;
+            font-size: 0.95rem;
             text-align: left;
             cursor: pointer;
             transition: all 0.2s ease;
             outline: none;
+            color: var(--text);
+            line-height: 1.4;
         }
 
         .option-btn:hover {
-            background-color: #e2e6ea;
-            border-color: #dae0e5;
-        }
-
-        .option-btn.selected {
-            border-color: var(--secondary);
-            background-color: #ebf5fb;
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
         }
 
         .option-btn.correct {
-            background-color: #d4edda !important;
+            background-color: #dcfce7 !important;
             border-color: var(--success) !important;
-            color: #155724;
-            font-weight: bold;
+            color: #14532d;
+            font-weight: 600;
         }
 
         .option-btn.incorrect {
-            background-color: #f8d7da !important;
+            background-color: #fee2e2 !important;
             border-color: var(--danger) !important;
-            color: #721c24;
+            color: #7f1d1d;
         }
 
         .feedback {
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 6px;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
             display: none;
             font-size: 0.95rem;
+            line-height: 1.5;
         }
 
         .feedback.correct {
             display: block;
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background-color: #dcfce7;
+            color: #14532d;
+            border: 1px solid #86efac;
         }
 
         .feedback.incorrect {
             display: block;
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background-color: #fee2e2;
+            color: #7f1d1d;
+            border: 1px solid #fca5a5;
         }
 
         .controls {
             display: flex;
             justify-content: space-between;
-            margin-top: 25px;
+            margin-top: 30px;
         }
 
         .btn {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 6px;
-            font-size: 1rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
             cursor: pointer;
             font-weight: 600;
             transition: background-color 0.2s;
@@ -161,11 +161,11 @@
         }
 
         .btn-primary:hover {
-            background-color: #2980b9;
+            background-color: #1d4ed8;
         }
 
         .btn:disabled {
-            background-color: #cccccc;
+            background-color: #cbd5e1;
             cursor: not-allowed;
         }
 
@@ -175,7 +175,7 @@
         }
 
         .score-display {
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: bold;
             color: var(--primary);
             margin: 15px 0;
@@ -184,19 +184,19 @@
         .btn-restart {
             background-color: var(--success);
             color: white;
-            margin-top: 15px;
+            margin-top: 20px;
         }
 
         .btn-restart:hover {
-            background-color: #27ae60;
+            background-color: #15803d;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Simulador de Examen</h1>
-    <p class="subtitle">Auditoría y Planificación Informatica</p>
+    <h1>Simulador Avanzado de Auditoría</h1>
+    <p class="subtitle">Evaluación de Nivel Complejo | Opciones Homogéneas</p>
 
     <div class="progress-bar-container" id="progress-container">
         <div class="progress-bar" id="progress-bar"></div>
@@ -207,11 +207,11 @@
 
     <!-- Resultados -->
     <div class="results-container" id="results-container">
-        <h2>Examen Finalizado</h2>
-        <p>Tu puntuación es:</p>
+        <h2>Evaluación Finalizada</h2>
+        <p>Tu resultado global es:</p>
         <div class="score-display" id="score-text">0 / 0</div>
         <p id="feedback-message"></p>
-        <button class="btn btn-restart" onclick="restartQuiz()">Volver a intentar</button>
+        <button class="btn btn-restart" onclick="restartQuiz()">Reintentar examen</button>
     </div>
 
     <!-- Botones de Navegación -->
@@ -224,169 +224,169 @@
 <script>
     const questions = [
         {
-            question: "1. ¿Cuál es el concepto principal de una auditoría?",
+            question: "1. Una firma contable independiente realiza un examen para validar si los estados financieros presentados reflejan fielmente la situación de una empresa. ¿A qué tipo de auditoría y objetivo corresponde este trabajo?",
             options: [
-                "A) Un proceso para sancionar financieramente a los empleados de una empresa.",
-                "B) Un proceso de revisión y evaluación que permite comprobar información, procesos, controles o actividades.",
-                "C) Una reunión para elaborar nuevos presupuestos de ventas.",
-                "D) La instalación de programas de computadoras e infraestructura de red."
+                "A) Auditoría interna enfocada en la detección preventiva de cuellos de botella en la producción.",
+                "B) Auditoría externa enfocada en emitir una opinión independiente sobre la información auditada.",
+                "C) Auditoría de cumplimiento enfocada exclusivamente en el diseño de manuales de procedimientos.",
+                "D) Auditoría interna enfocada en sancionar a los directivos por el incumplimiento de las NIF."
             ],
             correct: 1,
-            explanation: "Auditoría es un proceso de revisión y evaluación para comprobar información, controles o actividades."
+            explanation: "La auditoría externa la realiza un auditor independiente para emitir una opinión profesional e independiente sobre la información analizada."
         },
         {
-            question: "2. ¿Cuál es el objetivo de una auditoría realizada por un auditor externo?",
+            question: "2. Si la administración de una empresa requiere verificar que el departamento de bodega registre correctamente cada salida de mercadería para evitar pérdidas, ¿qué tipo de auditoría debe ejecutar y por qué?",
             options: [
-                "A) Revisar internamente para mejorar únicamente los inventarios cotidianos.",
-                "B) Emitir una opinión profesional e independiente sobre la información auditada.",
-                "C) Redactar las políticas internas del departamento de recursos humanos.",
-                "D) Reemplazar al personal de la administración en sus funciones diarias."
-            ],
-            correct: 1,
-            explanation: "La auditoría externa la realiza un auditor independiente para emitir una opinión independiente sobre la información."
-        },
-        {
-            question: "3. Las Normas de Información Financiera (NIF) sirven para:",
-            options: [
-                "A) Sancionar los accesos no autorizados a las bases de datos.",
-                "B) Establecer un cronograma de trabajo técnico dentro de la organización.",
-                "C) Establecer cómo se debe preparar y presentar la información financiera de una empresa.",
-                "D) Definir los tipos de virus informáticos que afectan a la empresa."
+                "A) Auditoría externa, porque requiere un dictamen formal válido únicamente para instituciones bancarias.",
+                "B) Auditoría informática, porque evalúa exclusivamente el mantenimiento de los servidores de la empresa.",
+                "C) Auditoría interna, porque revisa los procesos, controles y actividades dentro de la organización.",
+                "D) Auditoría preventiva, porque su único propósito es sancionar al personal del área de inventarios."
             ],
             correct: 2,
-            explanation: "NIF = normas que establecen cómo preparar y presentar la información financiera."
+            explanation: "La auditoría interna se realiza dentro de la propia organización para revisar y mejorar sus procesos, controles y actividades."
         },
         {
-            question: "4. Según la NIA 705, ¿de qué trata esta norma internacional?",
+            question: "3. En el ámbito contable, las Normas de Información Financiera (NIF) cumplen un rol técnico fundamental. ¿Cuál de las siguientes afirmaciones define su propósito exacto?",
             options: [
-                "A) Del mantenimiento físico de los servidores.",
-                "B) De las modificaciones a la opinión del auditor en su informe.",
-                "C) De la contratación del personal de auditoría interna.",
-                "D) De los procedimientos de conteo físico del inventario."
-            ],
-            correct: 1,
-            explanation: "NIA 705 trata sobre las modificaciones a la opinión del auditor en su informe (opinión modificada)."
-        },
-        {
-            question: "5. ¿Cuál es la función principal de un Control Preventivo?",
-            options: [
-                "A) Solucionar un problema que ya ocurrió.",
-                "B) Encontrar y reportar irregularidades una vez sucedidas.",
-                "C) Actuar antes de que ocurra un problema con el objetivo de evitarlo.",
-                "D) Investigar faltantes en un inventario."
+                "A) Regulan la metodología para estructurar el cronograma de actividades de una auditoría informática.",
+                "B) Guían los procedimientos mediante los cuales se diseñan y aplican los controles de acceso lógico.",
+                "C) Establecen los lineamientos para la preparación y presentación de la información financiera.",
+                "D) Definen las sanciones legales que deben aplicarse a los auditores independientes en su informe."
             ],
             correct: 2,
-            explanation: "Preventivo actúa antes del problema para evitarlo (Preventivo = evita)."
+            explanation: "Las NIF son las normas que establecen formalmente cómo se debe preparar y presentar la información financiera de una empresa."
         },
         {
-            question: "6. Un ejemplo claro de Control Detectivo es:",
+            question: "4. Durante la emisión del dictamen final, el auditor encuentra incorrecciones materiales que no son generalizadas pero modifican su dictamen final. ¿Qué norma internacional aplica y de qué trata?",
             options: [
-                "A) Exigir usuario y contraseña para ingresar al sistema.",
-                "B) Revisar los registros de acceso de un sistema para detectar ingresos no autorizados.",
-                "C) Bloquear una cuenta de usuario después de una intrusión.",
-                "D) Cambiar los permisos de un archivo infectado."
-            ],
-            correct: 1,
-            explanation: "Control detectivo busca encontrar situaciones irregulares, como revisar registros de acceso para encontrar accesos no autorizados."
-        },
-        {
-            question: "7. Si una empresa detecta una falla en los accesos a sus sistemas, bloquea la cuenta afectada y corrige los permisos, está aplicando un control:",
-            options: [
-                "A) Preventivo.",
-                "B) Detectivo.",
-                "C) Correctivo.",
-                "D) Planificado."
-            ],
-            correct: 2,
-            explanation: "El control Correctivo actúa después de detectar el problema y sirve para solucionarlo (Correctivo = soluciona)."
-        },
-        {
-            question: "8. En la planificación de una auditoría informática, ¿qué define el 'Alcance'?",
-            options: [
-                "A) La lista de profesionales que integran el equipo auditor.",
-                "B) El propósito general que desea alcanzar la auditoría.",
-                "C) Los límites de la auditoría, indicando qué elementos serán revisados y cuáles no.",
-                "D) El software específico que se comprará para la evaluación."
-            ],
-            correct: 2,
-            explanation: "Alcance define los límites de la auditoría: hasta dónde llega y qué se va a revisar."
-        },
-        {
-            question: "9. Si un auditor indica que evaluará los datos comprendidos desde enero hasta junio de 2026, está definiendo el:",
-            options: [
-                "A) Periodo de revisión.",
-                "B) Equipo auditor.",
-                "C) Control detectivo.",
-                "D) Procedimiento de prueba."
+                "A) NIA 705, la cual trata sobre las modificaciones a la opinión del auditor en su informe final.",
+                "B) NIA 700, la cual regula exclusivamente el levantamiento de evidencias en pruebas de cumplimiento.",
+                "C) NIF 82, la cual establece la diferencia entre los controles informáticos preventivos y detectivos.",
+                "D) NIA 139, la cual especifica la redacción obligatoria del programa de actividades de inventario."
             ],
             correct: 0,
-            explanation: "El periodo de revisión determina el lapso de tiempo (desde cuándo hasta cuándo) en el que se analizará la información."
+            explanation: "La NIA 705 trata específicamente sobre las modificaciones a la opinión del auditor en su informe (opinión con salvedades, adversa o denegación)."
         },
         {
-            question: "10. ¿Qué elemento de la planificación busca determinar las posibles amenazas que afecten la seguridad, integridad o confidencialidad?",
+            question: "5. Para evitar que usuarios no autorizados accedan a la base de datos de nómina, la empresa exige autenticación mediante usuario y contraseña. ¿Qué tipo de control es y cómo actúa?",
             options: [
-                "A) Cronograma de actividades.",
-                "B) Identificación de riesgos.",
-                "C) Recurso documental.",
-                "D) Entidad o área a auditar."
-            ],
-            correct: 1,
-            explanation: "Identificación de riesgos determina posibles problemas o amenazas (acceso no autorizado, pérdida de datos, etc.)."
-        },
-        {
-            question: "11. ¿Qué es el Cronograma de Actividades?",
-            options: [
-                "A) El conjunto de profesionales encargados de emitir la opinión.",
-                "B) La lista detallada de normas financieras aplicables.",
-                "C) Una planificación organizada de las tareas indicando fechas, responsables y tiempos.",
-                "D) El presupuesto monetario total de la organización."
+                "A) Control Detectivo, porque actúa cuando ocurre la falla identificando al usuario infractor.",
+                "B) Control Correctivo, porque actúa después del problema solucionando las fugas de información.",
+                "C) Control Preventivo, porque actúa antes de que ocurra el problema con el objetivo de evitarlo.",
+                "D) Control Directivo, porque actúa fijando políticas generales de contratación en la empresa."
             ],
             correct: 2,
-            explanation: "El cronograma organiza tareas con fechas, responsables y tiempos de ejecución (qué se hace y cuándo)."
+            explanation: "Es un Control Preventivo porque actúa ANTES de que ocurra un evento no deseado con la finalidad de evitarlo."
         },
         {
-            question: "12. En un programa de auditoría, el concepto de 'Procedimiento' corresponde a:",
+            question: "6. Un equipo de seguridad informática analiza los registros de auditoría (logs) a fin de mes y descubre que hubo un intento de acceso no autorizado. ¿Qué control se ha puesto en práctica?",
             options: [
-                "A) Con qué documento voy a comprobar la información.",
-                "B) La actividad o revisión específica que realizará el auditor.",
-                "C) Lo que el auditor espera encontrar al finalizar la revisión.",
-                "D) La norma internacional aplicable a la empresa."
+                "A) Control Preventivo, debido a que logró impedir el daño total de las bases de datos del sistema.",
+                "B) Control Detectivo, debido a que permitió encontrar una situación irregular o un problema sucedido.",
+                "C) Control Correctivo, debido a que modificó inmediatamente los permisos del usuario en la red.",
+                "D) Control Normativo, debido a que verifica el cumplimiento de las políticas de contraseñas de las NIF."
             ],
             correct: 1,
-            explanation: "Procedimiento es la actividad o revisión específica que realizará el auditor (Procedimiento = qué reviso)."
+            explanation: "Es un Control Detectivo porque actúa en o después del evento y su función clave es encontrar/detectar la irregularidad."
         },
         {
-            question: "13. ¿Qué representa la 'Evidencia requerida' en el programa de auditoría?",
+            question: "7. Una vez detectado que una cuenta de usuario realizó descargas masivas no autorizadas, el administrador bloquea el usuario y reconfigura los permisos. ¿A qué categoría pertenece esta acción?",
             options: [
-                "A) La forma o método utilizado para hacer la revisión.",
-                "B) La información, documento o registro necesario para comprobar lo que se revisa.",
-                "C) La sanción aplicada tras encontrar una falta.",
-                "D) El tiempo en días que durará la auditoría."
+                "A) Control Correctivo, ya que su propósito final es solucionar un problema que previamente fue detectado.",
+                "B) Control Preventivo, ya que evita que el resto de servidores sufran alteraciones en sus registros.",
+                "C) Control Detectivo, ya que identifica los accesos no autorizados mediante una revisión de red.",
+                "D) Control de Alcance, ya que restringe los límites de revisión que tendrá el auditor informático."
+            ],
+            correct: 0,
+            explanation: "El Control Correctivo actúa después de que el problema fue detectado y su objetivo principal es solucionarlo."
+        },
+        {
+            question: "8. Al definir los límites de una auditoría, el auditor especifica que evaluará únicamente el módulo de compras, los usuarios del sistema contable y la red local. ¿Qué elemento de planificación redactó?",
+            options: [
+                "A) El Objetivo, porque explica el propósito final que busca alcanzar la revisión en los sistemas.",
+                "B) El Alcance, porque define los límites e indica qué elementos serán revisados y cuáles no.",
+                "C) La Metodología, porque especifica la secuencia de pruebas que ejecutará el equipo técnico.",
+                "D) El Programa, porque lista los responsables directos y las evidencias que se revisarán en el mes."
             ],
             correct: 1,
-            explanation: "Evidencia es la información o documento con el que el auditor comprueba lo que está revisando (Evidencia = con qué compruebo)."
+            explanation: "El Alcance establece los límites de la auditoría, delimitando qué sistemas, procesos o áreas serán analizados y cuáles quedan fuera."
         },
         {
-            question: "14. Inspección, prueba de cumplimiento, observación y análisis son ejemplos de:",
+            question: "9. Si en la fase de planificación se establece que la evaluación abarcará la información comprendida entre el 01 de enero y el 30 de junio del año 2026, el auditor está delimitando:",
             options: [
-                "A) Resultados esperados.",
-                "B) Tipos de controles correctivos.",
-                "C) Técnicas de auditoría.",
-                "D) Tipos de opiniones modificadas."
+                "A) El Cronograma de actividades de la auditoría.",
+                "B) El Alcance de los procedimientos de mitigación.",
+                "C) El Periodo de revisión de la auditoría informática.",
+                "D) Los Recursos necesarios para la ejecución del plan."
             ],
             correct: 2,
-            explanation: "Técnica de auditoría es la forma o método que utiliza el auditor para revisar y obtener evidencia."
+            explanation: "El Periodo de revisión determina expresamente el lapso de tiempo (desde cuándo hasta cuándo) en el cual se analizarán las actividades e información."
         },
         {
-            question: "15. Si el procedimiento es 'Revisar respaldos', la técnica es 'Observación' y la evidencia es 'Reportes de backup', el RESULTADO ESPERADO es:",
+            question: "10. La identificación de riesgos en la planificación de una auditoría informática tiene como propósito fundamental:",
             options: [
-                "A) Usuarios autorizados.",
-                "B) Contraseñas seguras.",
-                "C) Información protegida.",
-                "D) Datos de inventario corregidos."
+                "A) Detallar el número exacto de computadores y licencias de software que el equipo auditor utilizará.",
+                "B) Determinar las posibles amenazas que puedan afectar la seguridad, disponibilidad o confidencialidad.",
+                "C) Asignar los roles de trabajo específicos entre el auditor líder y los analistas de soporte técnico.",
+                "D) Establecer la fecha de la reunión inicial con los directivos para la presentación del informe final."
+            ],
+            correct: 1,
+            explanation: "La Identificación de riesgos consiste en determinar amenazas o fallas potenciales (accesos no autorizados, ataques, pérdidas) que comprometan la información."
+        },
+        {
+            question: "11. ¿En qué se diferencia principalmente la 'Identificación de Riesgos' del 'Cronograma de Actividades'?",
+            options: [
+                "A) Los riesgos definen las herramientas de software; el cronograma define la opinión modificada.",
+                "B) Los riesgos establecen las metodologías de análisis; el cronograma lista el equipo de apoyo.",
+                "C) Los riesgos anticipan problemas potenciales; el cronograma organiza tareas, fechas y responsables.",
+                "D) Los riesgos delimitan los sistemas a evaluar; el cronograma establece el alcance del informe."
             ],
             correct: 2,
-            explanation: "Para la revisión de respaldos mediante reportes de backup, el resultado esperado es contar con información protegida."
+            explanation: "La Identificación de Riesgos prevé posibles amenazas; el Cronograma de Actividades planifica el trabajo en el tiempo asignando fechas, responsables y tareas."
+        },
+        {
+            question: "12. En la elaboración del programa de auditoría informática, ¿a qué hace referencia exacta el término 'Procedimiento'?",
+            options: [
+                "A) A la técnica mediante la cual se obtiene la evidencia, como la observación o el análisis.",
+                "B) A la actividad o revisión específica que el auditor va a realizar sobre el sistema o área.",
+                "C) Al resultado esperado que el auditor prevé obtener tras aplicar la prueba de cumplimiento.",
+                "D) Al tipo de documento o registro que se solicita al cliente para validar una transacción."
+            ],
+            correct: 1,
+            explanation: "En el programa de auditoría, el Procedimiento responde al 'qué reviso' (la actividad o revisión concreta que ejecutará el auditor)."
+        },
+        {
+            question: "13. ¿Cómo se relacionan la 'Técnica de auditoría' y la 'Evidencia requerida' dentro de la estructura de un programa de trabajo?",
+            options: [
+                "A) La técnica es el documento a comprobar; la evidencia es el límite de la auditoría informática.",
+                "B) La técnica es el resultado esperado; la evidencia es el responsable de ejecutar la prueba técnica.",
+                "C) La técnica es el método utilizado para revisar; la evidencia es la información utilizada para comprobar.",
+                "D) La técnica define los riesgos identificados; la evidencia representa la NIA aplicada al proceso."
+            ],
+            correct: 2,
+            explanation: "La Técnica es el método o forma empleada para revisar (cómo reviso), mientras que la Evidencia es la documentación con la que se comprueba (con qué compruebo)."
+        },
+        {
+            question: "14. El auditor aplica la técnica de 'Prueba de cumplimiento' sobre la directiva de seguridad de acceso. ¿Cuál es la evidencia requerida y el resultado esperado correspondiente?",
+            options: [
+                "A) Evidencia: Lista de usuarios | Resultado esperado: Modificación de la NIA 705.",
+                "B) Evidencia: Políticas de seguridad | Resultado esperado: Contraseñas seguras.",
+                "C) Evidencia: Reportes de backup | Resultado esperado: Datos de inventario correctos.",
+                "D) Evidencia: Base de datos | Resultado esperado: Bloqueo inmediato de usuarios."
+            ],
+            correct: 1,
+            explanation: "Según el cuadro del programa de la guía, al evaluar contraseñas con 'Prueba de cumplimiento', la evidencia son las 'Políticas de seguridad' y el resultado son 'Contraseñas seguras'."
+        },
+        {
+            question: "15. Si el procedimiento programado es 'Verificar registros de inventario' mediante la técnica de 'Análisis' y la evidencia es la 'Base de datos', el resultado esperado es:",
+            options: [
+                "A) La obtención de usuarios debidamente autorizados en el sistema.",
+                "B) La verificación de que la información se encuentra respaldada y protegida.",
+                "C) La validación de que los datos almacenados se encuentran correctos.",
+                "D) La aplicación de un control correctivo inmediato sobre los servidores."
+            ],
+            correct: 2,
+            explanation: "De acuerdo con el programa estructurado en la guía, la verificación de inventario busca como resultado esperado contar con 'Datos correctos'."
         }
     ];
 
@@ -435,7 +435,7 @@
     }
 
     function selectOption(questionIdx, optionIdx) {
-        if (userAnswers[questionIdx] !== null) return; // Ya respondida
+        if (userAnswers[questionIdx] !== null) return;
 
         userAnswers[questionIdx] = optionIdx;
         const q = questions[questionIdx];
@@ -455,10 +455,10 @@
 
         if (optionIdx === q.correct) {
             score++;
-            feedback.innerText = "¡Correcto! " + q.explanation;
+            feedback.innerText = "¡Respuesta Correcta! " + q.explanation;
             feedback.className = "feedback correct";
         } else {
-            feedback.innerText = "Incorrecto. " + q.explanation;
+            feedback.innerText = "Respuesta Incorrecta. " + q.explanation;
             feedback.className = "feedback incorrect";
         }
     }
@@ -471,7 +471,7 @@
         prevBtn.disabled = index === 0;
         
         if (index === questions.length - 1) {
-            nextBtn.innerText = "Finalizar";
+            nextBtn.innerText = "Finalizar Examen";
         } else {
             nextBtn.innerText = "Siguiente";
         }
@@ -514,14 +514,14 @@
         const percentage = (score / questions.length) * 100;
         const feedbackMsg = document.getElementById('feedback-message');
 
-        if (percentage >= 80) {
-            feedbackMsg.innerText = "¡Excelente trabajo! Tienes dominados los conceptos de la guía de auditoría.";
+        if (percentage >= 85) {
+            feedbackMsg.innerText = "¡Excelente nivel analítico! Tienes una comprensión sólida y profunda del contenido de la guía.";
             feedbackMsg.style.color = "var(--success)";
-        } else if (percentage >= 60) {
-            feedbackMsg.innerText = "Buen intento. Repasa un poco más los conceptos clave para asegurar una mejor nota.";
+        } else if (percentage >= 65) {
+            feedbackMsg.innerText = "Buen desempeño. Has dominado los conceptos generales, pero te conviene repasar las sutilezas entre los tipos de controles y los elementos del programa.";
             feedbackMsg.style.color = "var(--secondary)";
         } else {
-            feedbackMsg.innerText = "Necesitas estudiar más. Revisa nuevamente la guía de repaso y vuelve a intentarlo.";
+            feedbackMsg.innerText = "Nivel insuficiente. Se recomienda volver a estudiar la guía analizando las diferencias entre preventivo/detectivo/correctivo y la planificación.";
             feedbackMsg.style.color = "var(--danger)";
         }
     }
@@ -540,7 +540,6 @@
         showQuestion(0);
     }
 
-    // Inicializar quiz
     renderQuiz();
 </script>
 
