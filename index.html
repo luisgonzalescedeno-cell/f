@@ -3,594 +3,619 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz de Redes de Computadoras (23 Preguntas)</title>
+    <title>Simulador de Examen de Redes Avanzado</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
-<style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    <style>
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
-        .option-card {
-            transition: all 0.2s ease-in-out;
+        @keyframes pulse-red {
+            0%, 100% { background-color: rgba(239, 68, 68, 0.2); }
+            50% { background-color: rgba(239, 68, 68, 0.5); }
         }
-        .option-card:hover:not(.disabled) {
-            transform: translateY(-2px);
-            border-color: #4f46e5;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.12);
-        }
-        .correct-bg {
-            background-color: #f0fdf4 !important;
-            border-color: #22c55e !important;
-            color: #15803d !important;
-        }
-        .incorrect-bg {
-            background-color: #fef2f2 !important;
-            border-color: #ef4444 !important;
-            color: #b91c1c !important;
-        }
-        .progress-bar {
-            transition: width 0.3s ease-in-out;
+        .timer-warning {
+            animation: pulse-red 1s infinite;
         }
     </style>
 </head>
-<body class="min-h-screen text-slate-800 pb-16">
+<body class="bg-slate-900 text-slate-100 min-h-screen no-select font-sans antialiased pb-12">
 
-    <header class="bg-indigo-600 text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
-            <div>
-                <h1 class="text-2xl font-bold tracking-tight">Quiz: Redes de Computadoras</h1>
-                <p class="text-indigo-200 text-sm">Cuestionario con exactamente 23 preguntas trascritas</p>
+    <!-- Header Fijo -->
+    <header class="sticky top-0 z-50 bg-slate-800/90 backdrop-blur-md border-b border-slate-700 shadow-lg">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-network-wired text-indigo-400 text-2xl"></i>
+                <h1 class="font-bold text-lg text-white">Simulador de Redes <span class="text-xs bg-indigo-600 text-indigo-100 px-2 py-0.5 rounded-full uppercase tracking-wider ml-2">23 Preguntas</span></h1>
             </div>
-            <div id="stats-badge" class="bg-indigo-700/80 backdrop-blur-md px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-3">
-                <span>Contestadas: <strong id="answered-count" class="text-yellow-300">0</strong> / 23</span>
-                <span class="h-4 w-px bg-indigo-400"></span>
-                <span>Puntos: <strong id="score-badge" class="text-emerald-300">0</strong></span>
+            
+            <div class="flex items-center space-x-6">
+                <!-- Temporizador -->
+                <div id="timerContainer" class="flex items-center space-x-2 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg">
+                    <i class="fa-regular fa-clock text-indigo-400"></i>
+                    <span id="timer" class="font-mono font-bold text-indigo-200">15:00</span>
+                </div>
+                <!-- Progreso -->
+                <div class="text-right hidden sm:block">
+                    <div class="text-xs text-slate-400">Respondidas</div>
+                    <div class="font-bold text-indigo-300"><span id="answeredCount">0</span> / 23</div>
+                </div>
             </div>
         </div>
-        <!-- Progress Bar -->
-        <div class="w-full bg-indigo-950 h-2">
-            <div id="top-progress" class="bg-yellow-400 h-2 progress-bar w-0"></div>
+        <!-- Barra de Progreso Superior -->
+        <div class="w-full bg-slate-700 h-1.5">
+            <div id="progressBar" class="bg-indigo-500 h-1.5 w-0 transition-all duration-300"></div>
         </div>
     </header>
 
-    <main class="max-w-4xl mx-auto px-4 mt-8">
-        
-        <!-- Controls Bar -->
-        <div class="bg-white rounded-2xl p-6 mb-8 shadow-sm border border-slate-200/80 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
-                <h2 class="text-xl font-bold text-slate-900 mb-1">Cuestionario de Evaluación</h2>
-                <p class="text-slate-600 text-sm">Selecciona la opción correcta en cada una de las 23 preguntas.</p>
+    <div class="max-w-4xl mx-auto px-4 mt-6">
+
+        <!-- Selector de Modo de Examen -->
+        <div id="modeSelector" class="bg-slate-800 rounded-xl p-6 border border-slate-700 mb-8 shadow-xl">
+            <h2 class="text-xl font-bold mb-4 text-white flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-indigo-400"></i> Configuración de la Prueba
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="setMode('exam')" id="btnModeExam" class="p-4 rounded-lg border-2 border-indigo-500 bg-indigo-950/40 text-left hover:border-indigo-400 transition-all">
+                    <div class="font-bold text-indigo-300 mb-1 flex items-center justify-between">
+                        Modo Examen <i class="fa-solid fa-stopwatch"></i>
+                    </div>
+                    <div class="text-xs text-slate-400">Tiempo límite de 15 minutos. Evaluación al finalizar o agotar el tiempo.</div>
+                </button>
+                <button onclick="setMode('sudden_death')" id="btnModeDeath" class="p-4 rounded-lg border-2 border-slate-700 bg-slate-900/40 text-left hover:border-indigo-400 transition-all">
+                    <div class="font-bold text-slate-300 mb-1 flex items-center justify-between">
+                        Muerte Súbita <i class="fa-solid fa-skull"></i>
+                    </div>
+                    <div class="text-xs text-slate-400">El examen se termina inmediatamente al cometer el primer error.</div>
+                </button>
+                <button onclick="setMode('practice')" id="btnModePractice" class="p-4 rounded-lg border-2 border-slate-700 bg-slate-900/40 text-left hover:border-indigo-400 transition-all">
+                    <div class="font-bold text-slate-300 mb-1 flex items-center justify-between">
+                        Práctica Libre <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div class="text-xs text-slate-400">Sin límite de tiempo. Retroalimentación detallada inmediata.</div>
+                </button>
             </div>
-            <button onclick="resetQuiz()" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-indigo-600 border border-slate-300 rounded-xl hover:bg-slate-50 transition">
-                Reiniciar respuestas
+        </div>
+
+        <!-- Preguntas Container -->
+        <div id="quizContainer" class="space-y-6">
+            <!-- Se generan dinámicamente -->
+        </div>
+
+        <!-- Panel de Resultados (Oculto al inicio) -->
+        <div id="resultsPanel" class="hidden bg-slate-800 border border-slate-700 rounded-2xl p-8 mt-8 text-center shadow-2xl">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-indigo-600/20 text-indigo-400 rounded-full mb-4 border border-indigo-500/30">
+                <i class="fa-solid fa-trophy text-4xl"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold text-white mb-2">Prueba Finalizada</h2>
+            <p id="resultsSubtitle" class="text-slate-400 text-sm mb-6">Aquí tienes el desglose de tu rendimiento</p>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+                    <span class="text-xs text-slate-400 block uppercase font-semibold">Puntaje</span>
+                    <span id="scoreText" class="text-3xl font-extrabold text-indigo-400">0/23</span>
+                </div>
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+                    <span class="text-xs text-slate-400 block uppercase font-semibold">Porcentaje</span>
+                    <span id="percentText" class="text-3xl font-extrabold text-emerald-400">0%</span>
+                </div>
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+                    <span class="text-xs text-slate-400 block uppercase font-semibold">Tiempo Usado</span>
+                    <span id="timeUsedText" class="text-3xl font-extrabold text-amber-400">00:00</span>
+                </div>
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+                    <span class="text-xs text-slate-400 block uppercase font-semibold">Estado</span>
+                    <span id="statusText" class="text-xl font-bold text-slate-200 mt-1 block">---</span>
+                </div>
+            </div>
+
+            <div class="flex justify-center gap-4">
+                <button onclick="restartQuiz()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> Reintentar Simulador
+                </button>
+            </div>
+        </div>
+
+        <!-- Botón de Envío Examen -->
+        <div id="submitContainer" class="mt-8 text-center">
+            <button onclick="finishExam()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-lg py-4 px-12 rounded-xl shadow-xl transition-all border border-indigo-400 transform hover:-translate-y-1">
+                Finalizar y Calificar
             </button>
         </div>
 
-        <!-- Questions Container -->
-        <form id="quiz-form" class="space-y-6">
-            <div id="questions-container" class="space-y-6"></div>
-
-            <div class="bg-white rounded-2xl p-6 shadow-md border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div>
-                    <h3 class="font-semibold text-slate-800">¿Listo para evaluar tus respuestas?</h3>
-                    <p class="text-slate-500 text-sm">Haz clic en el botón para calificar todas las preguntas resueltas.</p>
-                </div>
-                <button type="button" onclick="evaluateAll()" class="w-full sm:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-200 transition-all transform active:scale-95">
-                    Calificar Cuestionario
-                </button>
-            </div>
-        </form>
-
-        <div id="results-modal" class="hidden mt-8 bg-white rounded-2xl p-8 shadow-xl border border-indigo-100 text-center space-y-4">
-            <div class="inline-flex p-4 rounded-full bg-indigo-50 text-indigo-600 mb-2">
-                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-            </div>
-            <h2 class="text-2xl font-bold text-slate-900">Resultado del Cuestionario</h2>
-            <p id="score-text" class="text-4xl font-extrabold text-indigo-600">0 / 23</p>
-            <p id="feedback-message" class="text-slate-600 font-medium"></p>
-            <div class="pt-4">
-                <button onclick="resetQuiz()" class="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition shadow">
-                    Intentar nuevamente
-                </button>
-            </div>
-        </div>
-    </main>
+    </div>
 
     <script>
-        const questionsData = [
+        const rawQuestions = [
             {
-                id: 1,
-                question: "¿Cuál fue la meta fundamental del DARPA?",
-                options: [
-                    "A) Crear una red exclusiva para interconectar universidades públicas.",
-                    "B) Crear una red que siguiera funcionando aunque fallaran algunos nodos.",
-                    "C) Desarrollar el primer protocolo comercial de correo electrónico.",
-                    "D) Sustituir completamente las comunicaciones por cable en los años 70."
-                ],
-                answer: 1,
-                explanation: "DARPA buscaba una red de comunicaciones robusta y descentralizada capaz de tolerar fallos en los nodos sin perder la conectividad global."
+                q: "¿Cuál fue la meta fundamental del DARPA?",
+                correct: "Crear una red que siguiera funcionando aunque fallaran algunos nodos.",
+                distractors: [
+                    "Desarrollar el protocolo HTTP para la transferencia global de hipertexto.",
+                    "Interconectar únicamente computadoras centrales gubernamentales mediante fibra óptica.",
+                    "Establecer un algoritmo rígido de direccionamiento estático global."
+                ]
             },
             {
-                id: 2,
-                question: "¿Qué significa 'End to End principle'?",
-                options: [
-                    "A) Que el control de la comunicación lo hacen los dispositivos finales (hosts).",
-                    "B) Que los routers intermedios deben examinar el contenido de cada archivo.",
-                    "C) Que los cables de red deben tener terminadores en sus extremos físicos.",
-                    "D) Que el cifrado solo puede configurarse en los switches centrales."
-                ],
-                answer: 0,
-                explanation: "El principio 'End-to-End' establece que las funciones de control de transporte y fiabilidad deben residir en los hosts finales."
+                q: "¿Qué significa \"End to End principle\"?",
+                correct: "Que el control de la comunicación lo hacen los dispositivos finales (hosts).",
+                distractors: [
+                    "Que los conmutadores y routers intermedios realizan el control de errores de aplicación.",
+                    "Que la topología lógica debe estar conectada mediante enlaces punto a punto cerrados.",
+                    "Que la capa de red garantiza la encriptación física del cableado."
+                ]
             },
             {
-                id: 3,
-                question: "¿Del modelo OSI, qué capa corresponde al acceso de red del TCP/IP?",
-                options: [
-                    "A) Solamente la capa de Red (Capa 3).",
-                    "B) Capa de Aplicación y Presentación (Capas 6 y 7).",
-                    "C) Las capas Física y de Enlace de datos (Capas 1 y 2).",
-                    "D) Capa de Transporte (Capa 4)."
-                ],
-                answer: 2,
-                explanation: "La capa de Acceso a la Red del modelo TCP/IP engloba las capas Física (1) y de Enlace de Datos (2) del modelo OSI."
+                q: "¿Del modelo OSI, qué capa corresponde al acceso de red del TCP/IP?",
+                correct: "Las Capas Física y de Enlace de datos (Capas 1 y 2).",
+                distractors: [
+                    "Únicamente la Capa de Red (Capa 3).",
+                    "La Capa de Transporte junto a la Capa de Sesión (Capas 4 y 5).",
+                    "La Capa de Aplicación, Presentación y Sesión (Capas 5, 6 y 7)."
+                ]
             },
             {
-                id: 4,
-                question: "¿Qué capa del modelo OSI corresponde a la capa de Internet del modelo TCP/IP?",
-                options: [
-                    "A) La capa de Enlace de Datos (Capa 2).",
-                    "B) La capa de Sesión (Capa 5).",
-                    "C) La capa de Transporte (Capa 4).",
-                    "D) La capa de Red (Capa 3)."
-                ],
-                answer: 3,
-                explanation: "La capa de Internet en TCP/IP es directamente equivalente a la Capa de Red (Capa 3) del modelo OSI."
+                q: "¿Qué capa del modelo OSI corresponde a la capa de Internet del modelo TCP/IP?",
+                correct: "La capa de Red (Capa 3).",
+                distractors: [
+                    "La capa de Enlace de datos (Capa 2).",
+                    "La capa de Transporte (Capa 4).",
+                    "La capa de Sesión (Capa 5)."
+                ]
             },
             {
-                id: 5,
-                question: "¿Cuál es la función principal de la capa de transporte de la arquitectura TCP/IP?",
-                options: [
-                    "A) Asignar direcciones MAC físicas a los adaptadores de red.",
-                    "B) Garantizar la entrega de datos de extremo a extremo de forma confiable.",
-                    "C) Determinar la ruta geográfica más corta para los paquetes.",
-                    "D) Convertir nombres de dominio en direcciones IP públicas."
-                ],
-                answer: 1,
-                explanation: "La capa de Transporte establece una transmisión de datos segura y fiable entre la fuente y el destino final."
+                q: "¿Cuál es la función principal de la capa de transporte de la arquitectura TCP/IP?",
+                correct: "Garantizar la entrega de datos de extremo a extremo de forma confiable.",
+                distractors: [
+                    "Establecer el direccionamiento IP físico de las tarjetas de red de origen y destino.",
+                    "Rutear los paquetes mediante la tabla de rutas hacia la interfaz más cercana.",
+                    "Codificar los bits en impulsos eléctricos o señales ópticas sobre el medio."
+                ]
             },
             {
-                id: 6,
-                question: "¿Cuál es la diferencia entre el protocolo TCP y UDP y en qué capa se encuentran?",
-                options: [
-                    "A) Pertenecen a la capa de aplicación; TCP es inseguro y UDP es cifrado.",
-                    "B) Pertenecen a la capa de red; TCP usa broadcasts y UDP unicasts.",
-                    "C) Están en la capa de Transporte; TCP es seguro y orientado a conexión, mientras que UDP es rápido y sin conexión.",
-                    "D) Pertenecen a la capa física; TCP es analógico y UDP es digital."
-                ],
-                answer: 2,
-                explanation: "TCP orienta la conexión garantizando entrega sin errores, mientras que UDP prioriza la velocidad omitiendo la confirmación."
+                q: "¿Cuál es la diferencia entre el protocolo TCP y UDP y en qué capa se encuentran?",
+                correct: "Están en la capa de Transporte. TCP es Seguro / orientado a conexión; UDP es rápido / sin conexión.",
+                distractors: [
+                    "Están en la capa de Internet. TCP es para multicast; UDP es para unicast.",
+                    "Están en la capa de Aplicación. TCP usa conexiones cifradas SSL; UDP envía texto plano.",
+                    "Están en la capa de Transporte. TCP es rápido / sin conexión; UDP es Seguro / orientado a conexión."
+                ]
             },
             {
-                id: 7,
-                question: "¿Qué protocolo opera en la capa de Internet?",
-                options: [
-                    "A) El protocolo IP (junto con ICMP y ARP).",
-                    "B) Solamente HTTP y HTTPS.",
-                    "C) Los protocolos TCP y UDP.",
-                    "D) El protocolo DNS y FTP."
-                ],
-                answer: 0,
-                explanation: "En la capa de Internet opera el protocolo IP, complementado por ICMP para control de mensajes y ARP para traducción de direcciones."
+                q: "¿Qué protocolo opera en la capa de Internet?",
+                correct: "El protocolo IP (junto con ICMP y ARP).",
+                distractors: [
+                    "El protocolo TCP (junto con UDP y TLS).",
+                    "El protocolo Ethernet (junto con 802.11 Wi-Fi).",
+                    "El protocolo BGP (junto con OSPF y RIP)."
+                ]
             },
             {
-                id: 8,
-                question: "¿Cuál es el tamaño mínimo del encabezado?",
-                options: [
-                    "A) 64 bytes.",
-                    "B) 10 bytes.",
-                    "C) 20 bytes (en IPv4).",
-                    "D) 32 bytes."
-                ],
-                answer: 2,
-                explanation: "El encabezado básico de una cabecera IPv4 sin opciones adicionales ocupa exactamente 20 bytes."
+                q: "¿Cuál es el tamaño mínimo del encabezado?",
+                correct: "20 bytes (en IPv4).",
+                distractors: [
+                    "32 bytes (en IPv4).",
+                    "16 bytes (en IPv4).",
+                    "64 bytes (en IPv4)."
+                ]
             },
             {
-                id: 9,
-                question: "¿Cómo se calcula la longitud mínima del encabezado IHL?",
-                options: [
-                    "A) Sumando 10 bytes al tamaño fijo de la trama Ethernet.",
-                    "B) Multiplicando el valor mínimo del IHL (5) por 4 bytes = 20 bytes.",
-                    "C) Dividiendo el tamaño del datagrama por 8 bits.",
-                    "D) Restando la máscara de subred del tamaño total del paquete."
-                ],
-                answer: 1,
-                explanation: "IHL especifica el tamaño en palabras de 32 bits (4 bytes). Un valor IHL de 5 equivale a 5 x 4 = 20 bytes."
+                q: "¿Cómo se calcula la longitud mínima del encabezado IHL?",
+                correct: "multiplicando el valor mínimo del IHL (5) por 4 bytes = 20 bytes.",
+                distractors: [
+                    "multiplicando el valor del IHL (8) por 2 bytes = 16 bytes.",
+                    "sumando el valor IHL al valor de la máscara de subred predeterminada.",
+                    "multiplicando el valor máximo de campo (15) por 3 bytes = 45 bytes."
+                ]
             },
             {
-                id: 10,
-                question: "¿Qué es TTL y cuál es su función?",
-                options: [
-                    "A) Significa Time to Live (Tiempo de vida) y evita que los paquetes giren infinitamente en la red eliminándolos al llegar a cero.",
-                    "B) Transmission Transport Layer; gestiona el ancho de banda máximo de la red.",
-                    "C) Transfer Type Link; determina la velocidad de transferencia entre dos routers.",
-                    "D) Total Traffic Level; mide el consumo total de datos descargados."
-                ],
-                answer: 0,
-                explanation: "El TTL decrementa en cada router por el que pasa un paquete. Al llegar a 0, el paquete es descartado para evitar bucles."
+                q: "¿Qué es TTL? / ¿Qué hace? / ¿Qué significa TTL?",
+                correct: "Significa Time to live (Tiempo de vida). Que hace: Evita que los paquetes giren infinitamente en la red eliminándolos al llegar a cero.",
+                distractors: [
+                    "Significa Total Traffic Limit. Que hace: Mide el consumo en megabytes del enlace en tiempo real.",
+                    "Significa Transport Layer Timing. Que hace: Sincroniza los relojes de hardware entre servidores primarios.",
+                    "Significa Time to live (Tiempo de vida). Que hace: Aumenta la velocidad del router cada vez que pasa por un salto."
+                ]
             },
             {
-                id: 11,
-                question: "¿Qué es la porción de Red y qué es la porción de hosts?",
-                options: [
-                    "A) La porción de red indica el puerto lógico y la de hosts el protocolo utilizado.",
-                    "B) La porción de red identifica la red específica y la porción de hosts identifica de forma única al dispositivo dentro de esa red.",
-                    "C) La porción de red asigna la velocidad y la de hosts limita la cantidad de usuarios.",
-                    "D) La porción de red es la dirección MAC y la de hosts es el DNS."
-                ],
-                answer: 1,
-                explanation: "Una dirección IP se divide en una parte para agrupar la subred común y otra parte para diferenciar a cada equipo."
+                q: "¿Qué es la porción de Red y qué es la porción de hosts?",
+                correct: "Porción de Red: Identifica la red especifica a la que pertenece el dispositivo. Porción de hosts: Identifica de forma única al dispositivo (hosts) dentro de esa red.",
+                distractors: [
+                    "Porción de Red: Identifica la dirección MAC física. Porción de hosts: Identifica el puerto de aplicación.",
+                    "Porción de Red: Identifica los primeros 8 bits siempre. Porción de hosts: Identifica los últimos 8 bits siempre.",
+                    "Porción de Red: Identifica al dispositivo único. Porción de hosts: Identifica la red completa a la que pertenece."
+                ]
             },
             {
-                id: 12,
-                question: "¿De cuántos bits es la máscara de red 255.255.255.0?",
-                options: [
-                    "A) Es de 16 bits (escrita como /16).",
-                    "B) Es de 32 bits (escrita como /32).",
-                    "C) Es de 24 bits (escrita como /24).",
-                    "D) Es de 8 bits (escrita como /8)."
-                ],
-                answer: 2,
-                explanation: "255.255.255.0 representa en binario 24 unos consecutivos, equivalentes a un prefijo de red /24."
+                q: "¿De cuántos bits es la máscara de red 255.255.255.0?",
+                correct: "Es de 24 bits (escrita como /24).",
+                distractors: [
+                    "Es de 16 bits (escrita como /16).",
+                    "Es de 32 bits (escrita como /32).",
+                    "Es de 8 bits (escrita como /8)."
+                ]
             },
             {
-                id: 13,
-                question: "¿Qué es loopback y para qué se utiliza?",
-                options: [
-                    "A) Una técnica para amplificar redes Wi-Fi lejanas.",
-                    "B) Un tipo de cable trenzado para conectar dos conmutadores.",
-                    "C) Un puerto físico adicional reservado para mantenimiento.",
-                    "D) Una dirección IP especial (127.0.0.1) para diagnóstico interno y probar la pila de protocolos TCP/IP sin enviar datos a la red."
-                ],
-                answer: 3,
-                explanation: "La interfaz loopback devuelve las transmisiones al propio sistema para probar su tarjeta de red interna."
+                q: "¿Qué es loopback y para qué se utiliza?",
+                correct: "Una dirección IP especial (127.0.0.1) que apunta al propio equipo. Sirve para diagnóstico interno y probar la pila de protocolos TCP/IP sin enviar datos a la red externa.",
+                distractors: [
+                    "Un puerto de red público usado para ruteo estático directo hacia el servidor DNS.",
+                    "Una dirección MAC reservada para transmisiones de broadcast hacia el switch central.",
+                    "Un comando de consola exclusivo de routers Cisco para reiniciar las interfaces activas."
+                ]
             },
             {
-                id: 14,
-                question: "¿Qué es CIDR y su ventaja?",
-                options: [
-                    "A) Enrutamiento con clase estricto que obliga a usar solo redes Clase A, B o C.",
-                    "B) Enrutamiento sin clase que permite asignar bloques de direcciones IP con máscaras de longitud variable, evitando el desperdicio de direcciones IP.",
-                    "C) Un protocolo de seguridad que reemplaza a las contraseñas WPA3.",
-                    "D) Un estándar de compresión de archivos multimedia en redes locales."
-                ],
-                answer: 1,
-                explanation: "CIDR elimina el rígido sistema de clases fijas (A, B, C), optimizando el aprovechamiento del espacio de direcciones IP."
+                q: "¿Qué es CIDR y su ventaja?",
+                correct: "Enrutamiento sin clase que permite asignar bloques de direcciones IP con máscaras de longitud variable. Ventajas: Es más flexible que las clases antiguas y evita el desperdicio de direcciones IP.",
+                distractors: [
+                    "Protocolo de enrutamiento interno con clase. Ventajas: Simplifica el conteo de saltos en redes pequeñas.",
+                    "Algoritmo de cifrado de paquetes IP. Ventajas: Protege las cabeceras contra inspección profunda.",
+                    "Técnica de conmutación de etiquetas. Ventajas: Reemplaza por completo el uso de tablas ARP."
+                ]
             },
             {
-                id: 15,
-                question: "¿Qué es un enrutamiento estático y dinámico?",
-                options: [
-                    "A) Estático es la configuración manual de rutas (no cambia sola) y dinámico es cuando los routers aprenden y actualizan rutas automáticamente.",
-                    "B) El estático se usa en redes inalámbricas y el dinámico solo en fibra óptica.",
-                    "C) El estático cambia las rutas cada hora y el dinámico no se altera nunca.",
-                    "D) El estático es controlado por el cliente y el dinámico por el proveedor ISP únicamente."
-                ],
-                answer: 0,
-                explanation: "El enrutamiento estático requiere intervención del administrador, mientras que el dinámico usa protocolos autónomos."
+                q: "¿Qué es un enrutamiento estático y dinámico?",
+                correct: "Estático: Configuración manual de rutas; no cambia sola. Dinámico: los routers aprenden y actualizan las rutas automáticamente.",
+                distractors: [
+                    "Estático: Configuración automática por DHCP. Dinámico: Configuración por comandos en línea.",
+                    "Estático: Exclusivo para switches Layer 2. Dinámico: Exclusivo para routers inalámbricos.",
+                    "Estático: Se actualiza cada 30 segundos. Dinámico: Permanece fijo en la memoria NVRAM."
+                ]
             },
             {
-                id: 16,
-                question: "¿Qué es el RIPv2 y cuáles son sus características?",
-                options: [
-                    "A) Protocolo de estado de enlace usado para redes globales sin soporte de claves.",
-                    "B) Protocolo exclusivo de fibra óptica con límite ilimitado de distancia.",
-                    "C) Protocolo de enrutamiento básico para redes pequeñas; soporta VLSM, usa multicast y tiene autenticación.",
-                    "D) Sistema de asignación automática de IP basado en direcciones físicas MAC."
-                ],
-                answer: 2,
-                explanation: "RIPv2 mejoró a RIPv1 añadiendo compatibilidad con VLSM, actualización mediante multicast y opciones de autenticación."
+                q: "¿Qué es el RIPv2 y características?",
+                correct: "Protocolo de enrutamiento básico para redes pequeñas. Características: Soporta VLSM, usa multicast y tiene autenticación.",
+                distractors: [
+                    "Protocolo de estado de enlace para redes corporativas. Características: Sin soporte a VLSM y usa unicast.",
+                    "Protocolo de vector distancia avanzado exclusivo de Cisco. Características: Usa métricas compuestas de ancho de banda.",
+                    "Protocolo de capa de aplicación. Características: Transmite tablas completas en texto plano sin autenticación."
+                ]
             },
             {
-                id: 17,
-                question: "¿Cuál es el límite de saltos del RIPv2?",
-                options: [
-                    "A) 255 saltos máximo.",
-                    "B) 100 saltos máximo.",
-                    "C) 15 saltos máximo (16 es inalcanzable).",
-                    "D) Sin límite de saltos."
-                ],
-                answer: 2,
-                explanation: "RIPv2 utiliza el conteo de saltos como métrica con un tope de 15; un valor de 16 se considera una red inalcanzable."
+                q: "Límite de Salto del RIPv2 ?",
+                correct: "15 saltos máximo (16 es inalcanzable).",
+                distractors: [
+                    "255 saltos máximo (256 es inalcanzable).",
+                    "100 saltos máximo (101 es inalcanzable).",
+                    "10 saltos máximo (11 es inalcanzable)."
+                ]
             },
             {
-                id: 18,
-                question: "¿Qué es EIGRP y sus características?",
-                options: [
-                    "A) Protocolo estándar abierto que solo mide la cantidad de dispositivos conectados.",
-                    "B) Protocolo de enrutamiento avanzado de Cisco, muy rápido (usa algoritmo DUAL) y calcula rutas por ancho de banda y retardo.",
-                    "C) Algoritmo sencillo de enrutamiento estático sin soporte para subredes.",
-                    "D) Protocolo de la capa de aplicación para la transferencia segura de archivos."
-                ],
-                answer: 1,
-                explanation: "EIGRP es un protocolo vectorial de distancia avanzado desarrollado por Cisco que destaca por su rápida convergencia con DUAL."
+                q: "¿Qué es EIGRP y sus características?",
+                correct: "Protocolo de enrutamiento avanzado de Cisco. Características: Muy rápido (usa algoritmo DUAL) y calcula rutas por ancho de banda y retardo.",
+                distractors: [
+                    "Protocolo estándar abierto sin clase. Características: Usa el algoritmo Dijkstra y cuenta únicamente saltos.",
+                    "Protocolo de enrutamiento exterior para Internet. Características: Basado en políticas de sistemas autónomos.",
+                    "Protocolo estático asistido por hardware. Características: Requiere configuración manual de métricas."
+                ]
             },
             {
-                id: 19,
-                question: "¿Cuál es la métrica utilizada por RIPv2?",
-                options: [
-                    "A) Ancho de banda y velocidad de reloj.",
-                    "B) Latencia estimada en milisegundos.",
-                    "C) Conteo de Saltos (Hop Count).",
-                    "D) Costo de enlace basado en gigabits."
-                ],
-                answer: 2,
-                explanation: "RIPv2 evalúa el mejor camino únicamente contando la cantidad de routers o saltos necesarios para alcanzar el destino."
+                q: "¿Cuál es la métrica utilizada por RIPv2?",
+                correct: "Conteo de Saltos (Hop Count).",
+                distractors: [
+                    "Ancho de banda y Retardo.",
+                    "Coste del enlace basado en la velocidad relativa.",
+                    "Carga del canal y Fiabilidad."
+                ]
             },
             {
-                id: 20,
-                question: "¿Cuál es la diferencia entre FLSM y VLSM?",
-                options: [
-                    "A) FLSM asigna a todas las subredes el mismo tamaño (máscara fija) y VLSM asigna diferentes tamaños según las necesidades de hosts (máscara variable).",
-                    "B) FLSM se usa en IPv6 y VLSM exclusivamente en IPv4.",
-                    "C) FLSM es dinámico y VLSM es estrictamente manual.",
-                    "D) No hay diferencia, ambos términos son sinónimos exactos."
-                ],
-                answer: 0,
-                explanation: "FLSM divide la red en partes idénticas mientras que VLSM permite optimizar subredes adaptando la máscara al número real de hosts."
+                q: "¿Cuál es la diferencia entre FLSM y ULSM?",
+                correct: "FLSM: Todas las subredes tienen el mismo tamaño (máscara fija). VLSM: las Subredes tienen diferentes tamaños según la necesidad de hosts (máscara variable).",
+                distractors: [
+                    "FLSM: Utiliza máscaras variables según hosts. VLSM: Divide la red en subredes exactamente iguales.",
+                    "FLSM: Exclusivo de IPv6. VLSM: Diseñado únicamente para direccionamiento clase A en IPv4.",
+                    "FLSM: Permite el ahorro máximo de direcciones IP. VLSM: Genera desperdicio de direcciones IP por máscara fija."
+                ]
             },
             {
-                id: 21,
-                question: "¿Cuál es la fórmula para calcular el número de hosts?",
-                options: [
-                    "A) 2^n - 2 (donde n es el número de bits dedicados a hosts).",
-                    "B) 2^n + 2 (donde n es la cantidad de routers intermedios).",
-                    "C) 256 - n (donde n es el número de la subred actual).",
-                    "D) n^2 - 1 (donde n es la cantidad de octetos de la máscara)."
-                ],
-                answer: 0,
-                explanation: "Se resta 2 porque la primera dirección identifica la red y la última se reserva para la dirección de broadcast."
+                q: "¿Cuál es la fórmula para calcular el número de hosts?",
+                correct: "2ⁿ - 2 (donde n es el número de bits dedicados a hosts).",
+                distractors: [
+                    "2ⁿ (donde n es el número de bits dedicados a la red).",
+                    "2ⁿ + 2 (donde n es el número de bits de la máscara).",
+                    "10ⁿ - 2 (donde n es el valor en decimal de la subred)."
+                ]
             },
             {
-                id: 22,
-                question: "¿Cómo se definen la Dirección de Red y la Dirección de Broadcast?",
-                options: [
-                    "A) Dirección de red: asignada al servidor DNS; Broadcast: asignada al puerto del switch.",
-                    "B) La dirección de red es la primera dirección IP de la subred y la de broadcast es la última (envía datos a todos los hosts).",
-                    "C) Dirección de red: la dirección del router; Broadcast: el rango de puertos disponibles.",
-                    "D) Dirección de red: cualquier IP par; Broadcast: cualquier IP impar de la subred."
-                ],
-                answer: 1,
-                explanation: "La IP inicial representa la identificación del segmento y la IP final emite tráfico simultáneo hacia todos los miembros."
+                q: "Dirección de red y Broadcast ?",
+                correct: "Dirección de red: la primera dirección IP de la Subred (identifica a la red). Broadcast: la última dirección IP de la subred (envía datos a todos los hosts).",
+                distractors: [
+                    "Dirección de red: la última IP asignable. Broadcast: la primera IP reservada para el Gateway por defecto.",
+                    "Dirección de red: cualquier IP par dentro del rango. Broadcast: cualquier IP impar dentro del rango.",
+                    "Dirección de red: la IP asignada al router principal. Broadcast: la IP 127.0.0.1 reservada."
+                ]
             },
             {
-                id: 23,
-                question: "¿Para qué se utiliza el subneteo?",
-                options: [
-                    "A) Para aumentar la velocidad física del cable de red sin cambiar hardware.",
-                    "B) Para convertir direcciones IPv4 en direcciones de última generación IPv6.",
-                    "C) Para dividir una red grande en redes más pequeñas, optimizando el rendimiento y la seguridad.",
-                    "D) Para evitar el pago de servicios de Internet a proveedores públicos."
-                ],
-                answer: 2,
-                explanation: "El subneteo reduce los dominios de difusión, mejorando el rendimiento de red y el aislamiento de seguridad."
+                q: "¿Para qué se utiliza el subneteo?",
+                correct: "Para dividir una red grande en redes más pequeñas, optimizando el rendimiento y la seguridad.",
+                distractors: [
+                    "Para convertir automáticamente direcciones IPv4 a formato IPv6 sin pérdida.",
+                    "Para aumentar el número total de direcciones IP públicas asignadas por el proveedor.",
+                    "Para evitar la configuración del protocolo ARP en los switches de capa de acceso."
+                ]
             }
         ];
 
+        let currentMode = 'exam'; // 'exam', 'sudden_death', 'practice'
+        let questions = [];
+        let userAnswers = {};
+        let timerInterval = null;
+        let timeRemaining = 15 * 60; // 15 minutos
+        let timeElapsed = 0;
+
+        // Anti-copia
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.ctrlKey && (e.key === 'c' || e.key === 'u' || e.key === 's' || e.key === 'a')) {
+                e.preventDefault();
+            }
+            if (e.key === 'F12') e.preventDefault();
+        });
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            let arr = [...array];
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [arr[currentIndex], arr[randomIndex]] = [arr[randomIndex], arr[currentIndex]];
+            }
+            return arr;
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('btnModeExam').className = mode === 'exam' ? 'p-4 rounded-lg border-2 border-indigo-500 bg-indigo-950/40 text-left hover:border-indigo-400 transition-all' : 'p-4 rounded-lg border-2 border-slate-700 bg-slate-900/40 text-left hover:border-indigo-400 transition-all';
+            document.getElementById('btnModeDeath').className = mode === 'sudden_death' ? 'p-4 rounded-lg border-2 border-rose-500 bg-rose-950/40 text-left hover:border-rose-400 transition-all' : 'p-4 rounded-lg border-2 border-slate-700 bg-slate-900/40 text-left hover:border-indigo-400 transition-all';
+            document.getElementById('btnModePractice').className = mode === 'practice' ? 'p-4 rounded-lg border-2 border-emerald-500 bg-emerald-950/40 text-left hover:border-emerald-400 transition-all' : 'p-4 rounded-lg border-2 border-slate-700 bg-slate-900/40 text-left hover:border-indigo-400 transition-all';
+            
+            restartQuiz();
+        }
+
+        function initQuiz() {
+            // Barajar preguntas
+            questions = shuffle(rawQuestions).map(qObj => {
+                const options = shuffle([
+                    { text: qObj.correct, isCorrect: true },
+                    ...qObj.distractors.map(d => ({ text: d, isCorrect: false }))
+                ]);
+                return {
+                    q: qObj.q,
+                    options: options,
+                    correctText: qObj.correct
+                };
+            });
+
+            userAnswers = {};
+            timeRemaining = 15 * 60;
+            timeElapsed = 0;
+            
+            renderQuestions();
+            updateProgress();
+            
+            clearInterval(timerInterval);
+            if (currentMode !== 'practice') {
+                document.getElementById('timerContainer').classList.remove('hidden');
+                timerInterval = setInterval(updateTimer, 1000);
+            } else {
+                document.getElementById('timerContainer').classList.add('hidden');
+            }
+
+            document.getElementById('resultsPanel').classList.add('hidden');
+            document.getElementById('submitContainer').classList.remove('hidden');
+        }
+
         function renderQuestions() {
-            const container = document.getElementById('questions-container');
+            const container = document.getElementById('quizContainer');
             container.innerHTML = '';
 
-            questionsData.forEach((q, index) => {
-                const qCard = document.createElement('div');
-                qCard.className = "bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 hover:shadow-md transition";
-                qCard.id = `q-card-${q.id}`;
+            questions.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-md transition-all";
+                card.id = `qCard_${idx}`;
 
                 let optionsHTML = '';
-                q.options.forEach((opt, optIndex) => {
+                const letters = ['A', 'B', 'C', 'D'];
+
+                q.options.forEach((opt, optIdx) => {
                     optionsHTML += `
-                        <label id="label-q${q.id}-opt${optIndex}" 
-                               class="option-card flex items-start p-3.5 rounded-xl border border-slate-200 cursor-pointer text-sm font-medium text-slate-700 bg-slate-50/50">
-                            <input type="radio" 
-                                   name="question-${q.id}" 
-                                   value="${optIndex}" 
-                                   onchange="onSelectOption(${q.id})" 
-                                   class="mt-0.5 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-300">
-                            <span class="ml-3 select-none">${opt}</span>
-                        </label>
+                        <button onclick="selectOption(${idx}, ${optIdx})" id="opt_${idx}_${optIdx}" 
+                            class="w-full text-left p-4 rounded-lg border border-slate-700 bg-slate-900/60 hover:bg-slate-700/50 hover:border-indigo-500/50 transition-all flex items-start space-x-3 group mb-2">
+                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-800 border border-slate-600 text-xs font-bold text-slate-300 group-hover:border-indigo-400 group-hover:text-white shrink-0 mt-0.5">
+                                ${letters[optIdx]}
+                            </span>
+                            <span class="text-slate-200 text-sm leading-relaxed">${escapeHTML(opt.text)}</span>
+                        </button>
                     `;
                 });
 
-                qCard.innerHTML = `
-                    <div class="flex items-center justify-between gap-2 mb-3">
-                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
-                            Pregunta ${index + 1} de ${questionsData.length}
-                        </span>
-                        <span id="badge-q${q.id}" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500">
-                            Pendiente
-                        </span>
+                card.innerHTML = `
+                    <div class="flex items-start justify-between mb-4">
+                        <h3 class="font-bold text-base text-white pr-4">
+                            <span class="text-indigo-400 mr-1">${idx + 1}.</span> ${escapeHTML(q.q)}
+                        </h3>
+                        <span id="badge_${idx}" class="text-xs bg-slate-700 text-slate-400 px-2.5 py-1 rounded-full font-medium shrink-0">Pendiente</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-slate-900 mb-4">${q.question}</h3>
-                    <div class="grid grid-cols-1 gap-2.5 mb-4">
+                    <div class="space-y-2">
                         ${optionsHTML}
                     </div>
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pt-3 border-t border-slate-100 gap-2">
-                        <button type="button" 
-                                onclick="checkSingleQuestion(${q.id})" 
-                                class="w-fit text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition">
-                            Comprobar esta respuesta
-                        </button>
-                        <div id="feedback-q${q.id}" class="text-xs font-medium hidden"></div>
-                    </div>
+                    <div id="feedback_${idx}" class="mt-4 hidden p-3 rounded-lg text-xs leading-relaxed"></div>
                 `;
 
-                container.appendChild(qCard);
+                container.appendChild(card);
             });
         }
 
-        function onSelectOption(qId) {
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        function selectOption(qIdx, optIdx) {
+            if (userAnswers[qIdx] !== undefined && currentMode !== 'practice') return; // Bloquear en examen si ya respondió
+
+            userAnswers[qIdx] = optIdx;
+
+            const q = questions[qIdx];
+            const selectedOpt = q.options[optIdx];
+            
+            // Actualizar interfaz visual de la pregunta
+            const card = document.getElementById(`qCard_${qIdx}`);
+            const badge = document.getElementById(`badge_${qIdx}`);
+            
+            q.options.forEach((_, i) => {
+                const btn = document.getElementById(`opt_${qIdx}_${i}`);
+                btn.className = "w-full text-left p-4 rounded-lg border border-slate-700 bg-slate-900/60 text-slate-400 transition-all flex items-start space-x-3 mb-2 opacity-60";
+            });
+
+            const selectedBtn = document.getElementById(`opt_${qIdx}_${optIdx}`);
+
+            if (currentMode === 'practice') {
+                if (selectedOpt.isCorrect) {
+                    selectedBtn.className = "w-full text-left p-4 rounded-lg border-2 border-emerald-500 bg-emerald-950/40 text-emerald-100 font-medium transition-all flex items-start space-x-3 mb-2 shadow-lg";
+                    badge.className = "text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full font-bold";
+                    badge.textContent = "¡Correcto!";
+                } else {
+                    selectedBtn.className = "w-full text-left p-4 rounded-lg border-2 border-rose-500 bg-rose-950/40 text-rose-100 transition-all flex items-start space-x-3 mb-2 shadow-lg";
+                    badge.className = "text-xs bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2.5 py-1 rounded-full font-bold";
+                    badge.textContent = "Incorrecto";
+                    
+                    // Mostrar también la correcta
+                    q.options.forEach((o, i) => {
+                        if (o.isCorrect) {
+                            const cBtn = document.getElementById(`opt_${qIdx}_${i}`);
+                            cBtn.className = "w-full text-left p-4 rounded-lg border-2 border-emerald-500 bg-emerald-950/20 text-emerald-200 transition-all flex items-start space-x-3 mb-2";
+                        }
+                    });
+                }
+            } else if (currentMode === 'sudden_death') {
+                if (!selectedOpt.isCorrect) {
+                    selectedBtn.className = "w-full text-left p-4 rounded-lg border-2 border-rose-500 bg-rose-950/40 text-rose-100 transition-all flex items-start space-x-3 mb-2";
+                    badge.textContent = "Fallaste";
+                    badge.className = "text-xs bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2.5 py-1 rounded-full font-bold";
+                    setTimeout(() => {
+                        alert("¡Muerte Súbita! Has cometido un error. Examen finalizado.");
+                        finishExam();
+                    }, 300);
+                    return;
+                } else {
+                    selectedBtn.className = "w-full text-left p-4 rounded-lg border-2 border-indigo-500 bg-indigo-950/50 text-indigo-100 transition-all flex items-start space-x-3 mb-2";
+                    badge.className = "text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2.5 py-1 rounded-full font-bold";
+                    badge.textContent = "Respondida";
+                }
+            } else { // Examen normal
+                selectedBtn.className = "w-full text-left p-4 rounded-lg border-2 border-indigo-500 bg-indigo-950/50 text-indigo-100 transition-all flex items-start space-x-3 mb-2";
+                badge.className = "text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2.5 py-1 rounded-full font-bold";
+                badge.textContent = "Respondida";
+            }
+
             updateProgress();
         }
 
         function updateProgress() {
-            let answered = 0;
-            questionsData.forEach(q => {
-                const selected = document.querySelector(`input[name="question-${q.id}"]:checked`);
-                if (selected) answered++;
-            });
-
-            document.getElementById('answered-count').innerText = answered;
-            const percent = (answered / questionsData.length) * 100;
-            document.getElementById('top-progress').style.width = `${percent}%`;
+            const answered = Object.keys(userAnswers).length;
+            document.getElementById('answeredCount').textContent = answered;
+            const pct = (answered / 23) * 100;
+            document.getElementById('progressBar').style.width = `${pct}%`;
         }
 
-        function checkSingleQuestion(qId) {
-            const q = questionsData.find(item => item.id === qId);
-            const selected = document.querySelector(`input[name="question-${q.id}"]:checked`);
-            const badge = document.getElementById(`badge-q${qId}`);
-            const feedback = document.getElementById(`feedback-q${qId}`);
+        function updateTimer() {
+            timeRemaining--;
+            timeElapsed++;
+            
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            
+            const timerEl = document.getElementById('timer');
+            timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-            if (!selected) {
-                feedback.innerText = "Por favor selecciona una respuesta.";
-                feedback.className = "text-xs font-semibold text-amber-600 block";
-                return;
+            if (timeRemaining <= 180) { // Últimos 3 min
+                document.getElementById('timerContainer').classList.add('timer-warning', 'border-rose-500');
             }
 
-            const selectedVal = parseInt(selected.value);
-
-            // Clean options style
-            q.options.forEach((_, optIdx) => {
-                const label = document.getElementById(`label-q${qId}-opt${optIdx}`);
-                label.classList.remove('correct-bg', 'incorrect-bg');
-            });
-
-            if (selectedVal === q.answer) {
-                document.getElementById(`label-q${qId}-opt${selectedVal}`).classList.add('correct-bg');
-                badge.innerText = "¡Correcto!";
-                badge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700";
-                feedback.innerHTML = `<strong>¡Correcto!</strong> ${q.explanation}`;
-                feedback.className = "text-xs font-normal text-emerald-700 bg-emerald-50 p-2.5 rounded-lg border border-emerald-200 block mt-2";
-            } else {
-                document.getElementById(`label-q${qId}-opt${selectedVal}`).classList.add('incorrect-bg');
-                document.getElementById(`label-q${qId}-opt${q.answer}`).classList.add('correct-bg');
-
-                badge.innerText = "Incorrecto";
-                badge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-red-100 text-red-700";
-                feedback.innerHTML = `<strong>Incorrecto.</strong> ${q.explanation}`;
-                feedback.className = "text-xs font-normal text-red-700 bg-red-50 p-2.5 rounded-lg border border-red-200 block mt-2";
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                alert("¡El tiempo ha expirado! Se evaluará tu examen con las respuestas registradas.");
+                finishExam();
             }
-
-            calculateScore();
         }
 
-        function calculateScore() {
-            let correctCount = 0;
-            questionsData.forEach(q => {
-                const selected = document.querySelector(`input[name="question-${q.id}"]:checked`);
-                if (selected && parseInt(selected.value) === q.answer) {
-                    correctCount++;
-                }
-            });
-            document.getElementById('score-badge').innerText = `${correctCount} / ${questionsData.length}`;
-            return correctCount;
-        }
-
-        function evaluateAll() {
-            let totalCorrect = 0;
-
-            questionsData.forEach(q => {
-                const selected = document.querySelector(`input[name="question-${q.id}"]:checked`);
-                const badge = document.getElementById(`badge-q${q.id}`);
-                const feedback = document.getElementById(`feedback-q${q.id}`);
-
-                q.options.forEach((_, optIdx) => {
-                    const label = document.getElementById(`label-q${q.id}-opt${optIdx}`);
-                    label.classList.remove('correct-bg', 'incorrect-bg');
-                });
-
-                if (selected) {
-                    const selectedVal = parseInt(selected.value);
-                    if (selectedVal === q.answer) {
-                        totalCorrect++;
-                        document.getElementById(`label-q${q.id}-opt${selectedVal}`).classList.add('correct-bg');
-                        badge.innerText = "¡Correcto!";
-                        badge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700";
-                        feedback.innerHTML = `<strong>¡Correcto!</strong> ${q.explanation}`;
-                        feedback.className = "text-xs font-normal text-emerald-700 bg-emerald-50 p-2.5 rounded-lg border border-emerald-200 block mt-2";
-                    } else {
-                        document.getElementById(`label-q${q.id}-opt${selectedVal}`).classList.add('incorrect-bg');
-                        document.getElementById(`label-q${q.id}-opt${q.answer}`).classList.add('correct-bg');
-                        badge.innerText = "Incorrecto";
-                        badge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-red-100 text-red-700";
-                        feedback.innerHTML = `<strong>Incorrecto.</strong> ${q.explanation}`;
-                        feedback.className = "text-xs font-normal text-red-700 bg-red-50 p-2.5 rounded-lg border border-red-200 block mt-2";
+        function finishExam() {
+            clearInterval(timerInterval);
+            
+            let score = 0;
+            questions.forEach((q, idx) => {
+                const selectedOptIdx = userAnswers[idx];
+                const card = document.getElementById(`qCard_${idx}`);
+                const feedback = document.getElementById(`feedback_${idx}`);
+                
+                if (selectedOptIdx !== undefined) {
+                    const selectedOpt = q.options[selectedOptIdx];
+                    if (selectedOpt.isCorrect) {
+                        score++;
                     }
-                } else {
-                    document.getElementById(`label-q${q.id}-opt${q.answer}`).classList.add('correct-bg');
-                    badge.innerText = "Sin responder";
-                    badge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700";
-                    feedback.innerHTML = `<strong>Sin responder.</strong> ${q.explanation}`;
-                    feedback.className = "text-xs font-normal text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200 block mt-2";
                 }
+
+                // Revelar respuestas de todas las preguntas
+                q.options.forEach((opt, optIdx) => {
+                    const btn = document.getElementById(`opt_${idx}_${optIdx}`);
+                    if (opt.isCorrect) {
+                        btn.className = "w-full text-left p-4 rounded-lg border-2 border-emerald-500 bg-emerald-950/40 text-emerald-100 font-medium transition-all flex items-start space-x-3 mb-2";
+                    } else if (optIdx === selectedOptIdx && !opt.isCorrect) {
+                        btn.className = "w-full text-left p-4 rounded-lg border-2 border-rose-500 bg-rose-950/40 text-rose-100 transition-all flex items-start space-x-3 mb-2";
+                    } else {
+                        btn.className = "w-full text-left p-4 rounded-lg border border-slate-800 bg-slate-900/30 text-slate-500 transition-all flex items-start space-x-3 mb-2 opacity-40";
+                    }
+                });
+
+                feedback.classList.remove('hidden');
+                feedback.className = "mt-4 p-3 rounded-lg text-xs leading-relaxed border bg-slate-900 border-slate-700 text-slate-300";
+                feedback.innerHTML = `<span class="font-bold text-indigo-400">Respuesta Oficial del Apunte:</span> ${escapeHTML(q.correctText)}`;
             });
 
-            // Display result modal
-            const resultsModal = document.getElementById('results-modal');
-            const scoreText = document.getElementById('score-text');
-            const feedbackMessage = document.getElementById('feedback-message');
+            // Mostrar Resultados
+            const percent = Math.round((score / 23) * 100);
+            document.getElementById('scoreText').textContent = `${score}/23`;
+            document.getElementById('percentText').textContent = `${percent}%`;
+            
+            const minU = Math.floor(timeElapsed / 60);
+            const secU = timeElapsed % 60;
+            document.getElementById('timeUsedText').textContent = `${minU.toString().padStart(2, '0')}:${secU.toString().padStart(2, '0')}`;
 
-            resultsModal.classList.remove('hidden');
-            scoreText.innerText = `${totalCorrect} / ${questionsData.length}`;
-            document.getElementById('score-badge').innerText = `${totalCorrect} / ${questionsData.length}`;
-
-            const percentage = (totalCorrect / questionsData.length) * 100;
-
-            if (percentage === 100) {
-                feedbackMessage.innerText = "¡Puntaje Perfecto! Has respondido correctamente las 23 preguntas.";
-                if (typeof confetti === 'function') confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
-            } else if (percentage >= 75) {
-                feedbackMessage.innerText = "¡Muy buen desempeño! Dominas la mayoría de los conceptos de redes.";
-            } else if (percentage >= 50) {
-                feedbackMessage.innerText = "Has aprobado el cuestionario, pero te recomendamos revisar las explicaciones resaltadas.";
+            const statusEl = document.getElementById('statusText');
+            if (percent >= 85) {
+                statusEl.textContent = "SOBRESALIENTE";
+                statusEl.className = "text-xl font-bold text-emerald-400 mt-1 block";
+                confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+            } else if (percent >= 70) {
+                statusEl.textContent = "APROBADO";
+                statusEl.className = "text-xl font-bold text-indigo-400 mt-1 block";
             } else {
-                feedbackMessage.innerText = "Te recomendamos repasar los apuntes de redes e intentarlo nuevamente.";
+                statusEl.textContent = "REPROBADO";
+                statusEl.className = "text-xl font-bold text-rose-400 mt-1 block";
             }
 
-            resultsModal.scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('resultsPanel').classList.remove('hidden');
+            document.getElementById('submitContainer').classList.add('hidden');
+
+            // Scroll suave hacia los resultados
+            document.getElementById('resultsPanel').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function resetQuiz() {
-            document.getElementById('quiz-form').reset();
-            document.getElementById('results-modal').classList.add('hidden');
-            document.getElementById('score-badge').innerText = "0";
-            document.getElementById('answered-count').innerText = "0";
-            document.getElementById('top-progress').style.width = "0%";
-
-            questionsData.forEach(q => {
-                const badge = document.getElementById(`badge-q${q.id}`);
-                const feedback = document.getElementById(`feedback-q${q.id}`);
-                badge.innerText = "Pendiente";
-                badge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500";
-                feedback.classList.add('hidden');
-
-                q.options.forEach((_, optIdx) => {
-                    const label = document.getElementById(`label-q${q.id}-opt${optIdx}`);
-                    label.classList.remove('correct-bg', 'incorrect-bg');
-                });
-            });
-
+        function restartQuiz() {
+            initQuiz();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        window.onload = function() {
-            renderQuestions();
-        };
+        // Inicializar al cargar la página
+        window.onload = initQuiz;
     </script>
 </body>
 </html>
