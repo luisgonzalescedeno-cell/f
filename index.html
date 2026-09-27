@@ -3,545 +3,594 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador Avanzado de Auditoría</title>
-    <style>
-        :root {
-            --primary: #1e293b;
-            --secondary: #2563eb;
-            --success: #16a34a;
-            --danger: #dc2626;
-            --background: #f8fafc;
-            --card: #ffffff;
-            --text: #0f172a;
-        }
-
+    <title>Quiz de Redes de Computadoras (23 Preguntas)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+<style>
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--background);
-            color: var(--text);
-            line-height: 1.5;
-            margin: 0;
-            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
         }
-
-        .container {
-            max-width: 850px;
-            margin: 0 auto;
-            background: var(--card);
-            padding: 35px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        .option-card {
+            transition: all 0.2s ease-in-out;
         }
-
-        h1 {
-            color: var(--primary);
-            text-align: center;
-            margin-bottom: 5px;
-            font-size: 1.8rem;
+        .option-card:hover:not(.disabled) {
+            transform: translateY(-2px);
+            border-color: #4f46e5;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.12);
         }
-
-        p.subtitle {
-            text-align: center;
-            color: #64748b;
-            margin-bottom: 25px;
-            font-size: 0.95rem;
+        .correct-bg {
+            background-color: #f0fdf4 !important;
+            border-color: #22c55e !important;
+            color: #15803d !important;
         }
-
-        .progress-bar-container {
-            width: 100%;
-            background-color: #e2e8f0;
-            border-radius: 10px;
-            height: 10px;
-            margin-bottom: 25px;
-            overflow: hidden;
+        .incorrect-bg {
+            background-color: #fef2f2 !important;
+            border-color: #ef4444 !important;
+            color: #b91c1c !important;
         }
-
         .progress-bar {
-            height: 100%;
-            width: 0%;
-            background-color: var(--secondary);
-            transition: width 0.3s ease;
-        }
-
-        .question-card {
-            display: none;
-        }
-
-        .question-card.active {
-            display: block;
-        }
-
-        .question-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 20px;
-        }
-
-        .options-container {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .option-btn {
-            background-color: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 14px 18px;
-            font-size: 0.95rem;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            outline: none;
-            color: var(--text);
-            line-height: 1.4;
-        }
-
-        .option-btn:hover {
-            background-color: #f1f5f9;
-            border-color: #cbd5e1;
-        }
-
-        .option-btn.correct {
-            background-color: #dcfce7 !important;
-            border-color: var(--success) !important;
-            color: #14532d;
-            font-weight: 600;
-        }
-
-        .option-btn.incorrect {
-            background-color: #fee2e2 !important;
-            border-color: var(--danger) !important;
-            color: #7f1d1d;
-        }
-
-        .feedback {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            display: none;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .feedback.correct {
-            display: block;
-            background-color: #dcfce7;
-            color: #14532d;
-            border: 1px solid #86efac;
-        }
-
-        .feedback.incorrect {
-            display: block;
-            background-color: #fee2e2;
-            color: #7f1d1d;
-            border: 1px solid #fca5a5;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.2s;
-        }
-
-        .btn-primary {
-            background-color: var(--secondary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-        }
-
-        .btn:disabled {
-            background-color: #cbd5e1;
-            cursor: not-allowed;
-        }
-
-        .results-container {
-            display: none;
-            text-align: center;
-        }
-
-        .score-display {
-            font-size: 3rem;
-            font-weight: bold;
-            color: var(--primary);
-            margin: 15px 0;
-        }
-
-        .btn-restart {
-            background-color: var(--success);
-            color: white;
-            margin-top: 20px;
-        }
-
-        .btn-restart:hover {
-            background-color: #15803d;
+            transition: width 0.3s ease-in-out;
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen text-slate-800 pb-16">
 
-<div class="container">
-    <h1>Simulador Avanzado de Auditoría</h1>
-    <p class="subtitle">Evaluación de Nivel Complejo | Opciones Homogéneas</p>
+    <header class="bg-indigo-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight">Quiz: Redes de Computadoras</h1>
+                <p class="text-indigo-200 text-sm">Cuestionario con exactamente 23 preguntas trascritas</p>
+            </div>
+            <div id="stats-badge" class="bg-indigo-700/80 backdrop-blur-md px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-3">
+                <span>Contestadas: <strong id="answered-count" class="text-yellow-300">0</strong> / 23</span>
+                <span class="h-4 w-px bg-indigo-400"></span>
+                <span>Puntos: <strong id="score-badge" class="text-emerald-300">0</strong></span>
+            </div>
+        </div>
+        <!-- Progress Bar -->
+        <div class="w-full bg-indigo-950 h-2">
+            <div id="top-progress" class="bg-yellow-400 h-2 progress-bar w-0"></div>
+        </div>
+    </header>
 
-    <div class="progress-bar-container" id="progress-container">
-        <div class="progress-bar" id="progress-bar"></div>
-    </div>
+    <main class="max-w-4xl mx-auto px-4 mt-8">
+        
+        <!-- Controls Bar -->
+        <div class="bg-white rounded-2xl p-6 mb-8 shadow-sm border border-slate-200/80 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+                <h2 class="text-xl font-bold text-slate-900 mb-1">Cuestionario de Evaluación</h2>
+                <p class="text-slate-600 text-sm">Selecciona la opción correcta en cada una de las 23 preguntas.</p>
+            </div>
+            <button onclick="resetQuiz()" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-indigo-600 border border-slate-300 rounded-xl hover:bg-slate-50 transition">
+                Reiniciar respuestas
+            </button>
+        </div>
 
-    <!-- Preguntas -->
-    <div id="quiz-container"></div>
+        <!-- Questions Container -->
+        <form id="quiz-form" class="space-y-6">
+            <div id="questions-container" class="space-y-6"></div>
 
-    <!-- Resultados -->
-    <div class="results-container" id="results-container">
-        <h2>Evaluación Finalizada</h2>
-        <p>Tu resultado global es:</p>
-        <div class="score-display" id="score-text">0 / 0</div>
-        <p id="feedback-message"></p>
-        <button class="btn btn-restart" onclick="restartQuiz()">Reintentar examen</button>
-    </div>
+            <div class="bg-white rounded-2xl p-6 shadow-md border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    <h3 class="font-semibold text-slate-800">¿Listo para evaluar tus respuestas?</h3>
+                    <p class="text-slate-500 text-sm">Haz clic en el botón para calificar todas las preguntas resueltas.</p>
+                </div>
+                <button type="button" onclick="evaluateAll()" class="w-full sm:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-200 transition-all transform active:scale-95">
+                    Calificar Cuestionario
+                </button>
+            </div>
+        </form>
 
-    <!-- Botones de Navegación -->
-    <div class="controls" id="controls">
-        <button class="btn btn-primary" id="prev-btn" onclick="prevQuestion()" disabled>Anterior</button>
-        <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()">Siguiente</button>
-    </div>
-</div>
+        <div id="results-modal" class="hidden mt-8 bg-white rounded-2xl p-8 shadow-xl border border-indigo-100 text-center space-y-4">
+            <div class="inline-flex p-4 rounded-full bg-indigo-50 text-indigo-600 mb-2">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-900">Resultado del Cuestionario</h2>
+            <p id="score-text" class="text-4xl font-extrabold text-indigo-600">0 / 23</p>
+            <p id="feedback-message" class="text-slate-600 font-medium"></p>
+            <div class="pt-4">
+                <button onclick="resetQuiz()" class="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition shadow">
+                    Intentar nuevamente
+                </button>
+            </div>
+        </div>
+    </main>
 
-<script>
-    const questions = [
-        {
-            question: "1. Una firma contable independiente realiza un examen para validar si los estados financieros presentados reflejan fielmente la situación de una empresa. ¿A qué tipo de auditoría y objetivo corresponde este trabajo?",
-            options: [
-                "A) Auditoría interna enfocada en la detección preventiva de cuellos de botella en la producción.",
-                "B) Auditoría externa enfocada en emitir una opinión independiente sobre la información auditada.",
-                "C) Auditoría de cumplimiento enfocada exclusivamente en el diseño de manuales de procedimientos.",
-                "D) Auditoría interna enfocada en sancionar a los directivos por el incumplimiento de las NIF."
-            ],
-            correct: 1,
-            explanation: "La auditoría externa la realiza un auditor independiente para emitir una opinión profesional e independiente sobre la información analizada."
-        },
-        {
-            question: "2. Si la administración de una empresa requiere verificar que el departamento de bodega registre correctamente cada salida de mercadería para evitar pérdidas, ¿qué tipo de auditoría debe ejecutar y por qué?",
-            options: [
-                "A) Auditoría externa, porque requiere un dictamen formal válido únicamente para instituciones bancarias.",
-                "B) Auditoría informática, porque evalúa exclusivamente el mantenimiento de los servidores de la empresa.",
-                "C) Auditoría interna, porque revisa los procesos, controles y actividades dentro de la organización.",
-                "D) Auditoría preventiva, porque su único propósito es sancionar al personal del área de inventarios."
-            ],
-            correct: 2,
-            explanation: "La auditoría interna se realiza dentro de la propia organización para revisar y mejorar sus procesos, controles y actividades."
-        },
-        {
-            question: "3. En el ámbito contable, las Normas de Información Financiera (NIF) cumplen un rol técnico fundamental. ¿Cuál de las siguientes afirmaciones define su propósito exacto?",
-            options: [
-                "A) Regulan la metodología para estructurar el cronograma de actividades de una auditoría informática.",
-                "B) Guían los procedimientos mediante los cuales se diseñan y aplican los controles de acceso lógico.",
-                "C) Establecen los lineamientos para la preparación y presentación de la información financiera.",
-                "D) Definen las sanciones legales que deben aplicarse a los auditores independientes en su informe."
-            ],
-            correct: 2,
-            explanation: "Las NIF son las normas que establecen formalmente cómo se debe preparar y presentar la información financiera de una empresa."
-        },
-        {
-            question: "4. Durante la emisión del dictamen final, el auditor encuentra incorrecciones materiales que no son generalizadas pero modifican su dictamen final. ¿Qué norma internacional aplica y de qué trata?",
-            options: [
-                "A) NIA 705, la cual trata sobre las modificaciones a la opinión del auditor en su informe final.",
-                "B) NIA 700, la cual regula exclusivamente el levantamiento de evidencias en pruebas de cumplimiento.",
-                "C) NIF 82, la cual establece la diferencia entre los controles informáticos preventivos y detectivos.",
-                "D) NIA 139, la cual especifica la redacción obligatoria del programa de actividades de inventario."
-            ],
-            correct: 0,
-            explanation: "La NIA 705 trata específicamente sobre las modificaciones a la opinión del auditor en su informe (opinión con salvedades, adversa o denegación)."
-        },
-        {
-            question: "5. Para evitar que usuarios no autorizados accedan a la base de datos de nómina, la empresa exige autenticación mediante usuario y contraseña. ¿Qué tipo de control es y cómo actúa?",
-            options: [
-                "A) Control Detectivo, porque actúa cuando ocurre la falla identificando al usuario infractor.",
-                "B) Control Correctivo, porque actúa después del problema solucionando las fugas de información.",
-                "C) Control Preventivo, porque actúa antes de que ocurra el problema con el objetivo de evitarlo.",
-                "D) Control Directivo, porque actúa fijando políticas generales de contratación en la empresa."
-            ],
-            correct: 2,
-            explanation: "Es un Control Preventivo porque actúa ANTES de que ocurra un evento no deseado con la finalidad de evitarlo."
-        },
-        {
-            question: "6. Un equipo de seguridad informática analiza los registros de auditoría (logs) a fin de mes y descubre que hubo un intento de acceso no autorizado. ¿Qué control se ha puesto en práctica?",
-            options: [
-                "A) Control Preventivo, debido a que logró impedir el daño total de las bases de datos del sistema.",
-                "B) Control Detectivo, debido a que permitió encontrar una situación irregular o un problema sucedido.",
-                "C) Control Correctivo, debido a que modificó inmediatamente los permisos del usuario en la red.",
-                "D) Control Normativo, debido a que verifica el cumplimiento de las políticas de contraseñas de las NIF."
-            ],
-            correct: 1,
-            explanation: "Es un Control Detectivo porque actúa en o después del evento y su función clave es encontrar/detectar la irregularidad."
-        },
-        {
-            question: "7. Una vez detectado que una cuenta de usuario realizó descargas masivas no autorizadas, el administrador bloquea el usuario y reconfigura los permisos. ¿A qué categoría pertenece esta acción?",
-            options: [
-                "A) Control Correctivo, ya que su propósito final es solucionar un problema que previamente fue detectado.",
-                "B) Control Preventivo, ya que evita que el resto de servidores sufran alteraciones en sus registros.",
-                "C) Control Detectivo, ya que identifica los accesos no autorizados mediante una revisión de red.",
-                "D) Control de Alcance, ya que restringe los límites de revisión que tendrá el auditor informático."
-            ],
-            correct: 0,
-            explanation: "El Control Correctivo actúa después de que el problema fue detectado y su objetivo principal es solucionarlo."
-        },
-        {
-            question: "8. Al definir los límites de una auditoría, el auditor especifica que evaluará únicamente el módulo de compras, los usuarios del sistema contable y la red local. ¿Qué elemento de planificación redactó?",
-            options: [
-                "A) El Objetivo, porque explica el propósito final que busca alcanzar la revisión en los sistemas.",
-                "B) El Alcance, porque define los límites e indica qué elementos serán revisados y cuáles no.",
-                "C) La Metodología, porque especifica la secuencia de pruebas que ejecutará el equipo técnico.",
-                "D) El Programa, porque lista los responsables directos y las evidencias que se revisarán en el mes."
-            ],
-            correct: 1,
-            explanation: "El Alcance establece los límites de la auditoría, delimitando qué sistemas, procesos o áreas serán analizados y cuáles quedan fuera."
-        },
-        {
-            question: "9. Si en la fase de planificación se establece que la evaluación abarcará la información comprendida entre el 01 de enero y el 30 de junio del año 2026, el auditor está delimitando:",
-            options: [
-                "A) El Cronograma de actividades de la auditoría.",
-                "B) El Alcance de los procedimientos de mitigación.",
-                "C) El Periodo de revisión de la auditoría informática.",
-                "D) Los Recursos necesarios para la ejecución del plan."
-            ],
-            correct: 2,
-            explanation: "El Periodo de revisión determina expresamente el lapso de tiempo (desde cuándo hasta cuándo) en el cual se analizarán las actividades e información."
-        },
-        {
-            question: "10. La identificación de riesgos en la planificación de una auditoría informática tiene como propósito fundamental:",
-            options: [
-                "A) Detallar el número exacto de computadores y licencias de software que el equipo auditor utilizará.",
-                "B) Determinar las posibles amenazas que puedan afectar la seguridad, disponibilidad o confidencialidad.",
-                "C) Asignar los roles de trabajo específicos entre el auditor líder y los analistas de soporte técnico.",
-                "D) Establecer la fecha de la reunión inicial con los directivos para la presentación del informe final."
-            ],
-            correct: 1,
-            explanation: "La Identificación de riesgos consiste en determinar amenazas o fallas potenciales (accesos no autorizados, ataques, pérdidas) que comprometan la información."
-        },
-        {
-            question: "11. ¿En qué se diferencia principalmente la 'Identificación de Riesgos' del 'Cronograma de Actividades'?",
-            options: [
-                "A) Los riesgos definen las herramientas de software; el cronograma define la opinión modificada.",
-                "B) Los riesgos establecen las metodologías de análisis; el cronograma lista el equipo de apoyo.",
-                "C) Los riesgos anticipan problemas potenciales; el cronograma organiza tareas, fechas y responsables.",
-                "D) Los riesgos delimitan los sistemas a evaluar; el cronograma establece el alcance del informe."
-            ],
-            correct: 2,
-            explanation: "La Identificación de Riesgos prevé posibles amenazas; el Cronograma de Actividades planifica el trabajo en el tiempo asignando fechas, responsables y tareas."
-        },
-        {
-            question: "12. En la elaboración del programa de auditoría informática, ¿a qué hace referencia exacta el término 'Procedimiento'?",
-            options: [
-                "A) A la técnica mediante la cual se obtiene la evidencia, como la observación o el análisis.",
-                "B) A la actividad o revisión específica que el auditor va a realizar sobre el sistema o área.",
-                "C) Al resultado esperado que el auditor prevé obtener tras aplicar la prueba de cumplimiento.",
-                "D) Al tipo de documento o registro que se solicita al cliente para validar una transacción."
-            ],
-            correct: 1,
-            explanation: "En el programa de auditoría, el Procedimiento responde al 'qué reviso' (la actividad o revisión concreta que ejecutará el auditor)."
-        },
-        {
-            question: "13. ¿Cómo se relacionan la 'Técnica de auditoría' y la 'Evidencia requerida' dentro de la estructura de un programa de trabajo?",
-            options: [
-                "A) La técnica es el documento a comprobar; la evidencia es el límite de la auditoría informática.",
-                "B) La técnica es el resultado esperado; la evidencia es el responsable de ejecutar la prueba técnica.",
-                "C) La técnica es el método utilizado para revisar; la evidencia es la información utilizada para comprobar.",
-                "D) La técnica define los riesgos identificados; la evidencia representa la NIA aplicada al proceso."
-            ],
-            correct: 2,
-            explanation: "La Técnica es el método o forma empleada para revisar (cómo reviso), mientras que la Evidencia es la documentación con la que se comprueba (con qué compruebo)."
-        },
-        {
-            question: "14. El auditor aplica la técnica de 'Prueba de cumplimiento' sobre la directiva de seguridad de acceso. ¿Cuál es la evidencia requerida y el resultado esperado correspondiente?",
-            options: [
-                "A) Evidencia: Lista de usuarios | Resultado esperado: Modificación de la NIA 705.",
-                "B) Evidencia: Políticas de seguridad | Resultado esperado: Contraseñas seguras.",
-                "C) Evidencia: Reportes de backup | Resultado esperado: Datos de inventario correctos.",
-                "D) Evidencia: Base de datos | Resultado esperado: Bloqueo inmediato de usuarios."
-            ],
-            correct: 1,
-            explanation: "Según el cuadro del programa de la guía, al evaluar contraseñas con 'Prueba de cumplimiento', la evidencia son las 'Políticas de seguridad' y el resultado son 'Contraseñas seguras'."
-        },
-        {
-            question: "15. Si el procedimiento programado es 'Verificar registros de inventario' mediante la técnica de 'Análisis' y la evidencia es la 'Base de datos', el resultado esperado es:",
-            options: [
-                "A) La obtención de usuarios debidamente autorizados en el sistema.",
-                "B) La verificación de que la información se encuentra respaldada y protegida.",
-                "C) La validación de que los datos almacenados se encuentran correctos.",
-                "D) La aplicación de un control correctivo inmediato sobre los servidores."
-            ],
-            correct: 2,
-            explanation: "De acuerdo con el programa estructurado en la guía, la verificación de inventario busca como resultado esperado contar con 'Datos correctos'."
+    <script>
+        const questionsData = [
+            {
+                id: 1,
+                question: "¿Cuál fue la meta fundamental del DARPA?",
+                options: [
+                    "A) Crear una red exclusiva para interconectar universidades públicas.",
+                    "B) Crear una red que siguiera funcionando aunque fallaran algunos nodos.",
+                    "C) Desarrollar el primer protocolo comercial de correo electrónico.",
+                    "D) Sustituir completamente las comunicaciones por cable en los años 70."
+                ],
+                answer: 1,
+                explanation: "DARPA buscaba una red de comunicaciones robusta y descentralizada capaz de tolerar fallos en los nodos sin perder la conectividad global."
+            },
+            {
+                id: 2,
+                question: "¿Qué significa 'End to End principle'?",
+                options: [
+                    "A) Que el control de la comunicación lo hacen los dispositivos finales (hosts).",
+                    "B) Que los routers intermedios deben examinar el contenido de cada archivo.",
+                    "C) Que los cables de red deben tener terminadores en sus extremos físicos.",
+                    "D) Que el cifrado solo puede configurarse en los switches centrales."
+                ],
+                answer: 0,
+                explanation: "El principio 'End-to-End' establece que las funciones de control de transporte y fiabilidad deben residir en los hosts finales."
+            },
+            {
+                id: 3,
+                question: "¿Del modelo OSI, qué capa corresponde al acceso de red del TCP/IP?",
+                options: [
+                    "A) Solamente la capa de Red (Capa 3).",
+                    "B) Capa de Aplicación y Presentación (Capas 6 y 7).",
+                    "C) Las capas Física y de Enlace de datos (Capas 1 y 2).",
+                    "D) Capa de Transporte (Capa 4)."
+                ],
+                answer: 2,
+                explanation: "La capa de Acceso a la Red del modelo TCP/IP engloba las capas Física (1) y de Enlace de Datos (2) del modelo OSI."
+            },
+            {
+                id: 4,
+                question: "¿Qué capa del modelo OSI corresponde a la capa de Internet del modelo TCP/IP?",
+                options: [
+                    "A) La capa de Enlace de Datos (Capa 2).",
+                    "B) La capa de Sesión (Capa 5).",
+                    "C) La capa de Transporte (Capa 4).",
+                    "D) La capa de Red (Capa 3)."
+                ],
+                answer: 3,
+                explanation: "La capa de Internet en TCP/IP es directamente equivalente a la Capa de Red (Capa 3) del modelo OSI."
+            },
+            {
+                id: 5,
+                question: "¿Cuál es la función principal de la capa de transporte de la arquitectura TCP/IP?",
+                options: [
+                    "A) Asignar direcciones MAC físicas a los adaptadores de red.",
+                    "B) Garantizar la entrega de datos de extremo a extremo de forma confiable.",
+                    "C) Determinar la ruta geográfica más corta para los paquetes.",
+                    "D) Convertir nombres de dominio en direcciones IP públicas."
+                ],
+                answer: 1,
+                explanation: "La capa de Transporte establece una transmisión de datos segura y fiable entre la fuente y el destino final."
+            },
+            {
+                id: 6,
+                question: "¿Cuál es la diferencia entre el protocolo TCP y UDP y en qué capa se encuentran?",
+                options: [
+                    "A) Pertenecen a la capa de aplicación; TCP es inseguro y UDP es cifrado.",
+                    "B) Pertenecen a la capa de red; TCP usa broadcasts y UDP unicasts.",
+                    "C) Están en la capa de Transporte; TCP es seguro y orientado a conexión, mientras que UDP es rápido y sin conexión.",
+                    "D) Pertenecen a la capa física; TCP es analógico y UDP es digital."
+                ],
+                answer: 2,
+                explanation: "TCP orienta la conexión garantizando entrega sin errores, mientras que UDP prioriza la velocidad omitiendo la confirmación."
+            },
+            {
+                id: 7,
+                question: "¿Qué protocolo opera en la capa de Internet?",
+                options: [
+                    "A) El protocolo IP (junto con ICMP y ARP).",
+                    "B) Solamente HTTP y HTTPS.",
+                    "C) Los protocolos TCP y UDP.",
+                    "D) El protocolo DNS y FTP."
+                ],
+                answer: 0,
+                explanation: "En la capa de Internet opera el protocolo IP, complementado por ICMP para control de mensajes y ARP para traducción de direcciones."
+            },
+            {
+                id: 8,
+                question: "¿Cuál es el tamaño mínimo del encabezado?",
+                options: [
+                    "A) 64 bytes.",
+                    "B) 10 bytes.",
+                    "C) 20 bytes (en IPv4).",
+                    "D) 32 bytes."
+                ],
+                answer: 2,
+                explanation: "El encabezado básico de una cabecera IPv4 sin opciones adicionales ocupa exactamente 20 bytes."
+            },
+            {
+                id: 9,
+                question: "¿Cómo se calcula la longitud mínima del encabezado IHL?",
+                options: [
+                    "A) Sumando 10 bytes al tamaño fijo de la trama Ethernet.",
+                    "B) Multiplicando el valor mínimo del IHL (5) por 4 bytes = 20 bytes.",
+                    "C) Dividiendo el tamaño del datagrama por 8 bits.",
+                    "D) Restando la máscara de subred del tamaño total del paquete."
+                ],
+                answer: 1,
+                explanation: "IHL especifica el tamaño en palabras de 32 bits (4 bytes). Un valor IHL de 5 equivale a 5 x 4 = 20 bytes."
+            },
+            {
+                id: 10,
+                question: "¿Qué es TTL y cuál es su función?",
+                options: [
+                    "A) Significa Time to Live (Tiempo de vida) y evita que los paquetes giren infinitamente en la red eliminándolos al llegar a cero.",
+                    "B) Transmission Transport Layer; gestiona el ancho de banda máximo de la red.",
+                    "C) Transfer Type Link; determina la velocidad de transferencia entre dos routers.",
+                    "D) Total Traffic Level; mide el consumo total de datos descargados."
+                ],
+                answer: 0,
+                explanation: "El TTL decrementa en cada router por el que pasa un paquete. Al llegar a 0, el paquete es descartado para evitar bucles."
+            },
+            {
+                id: 11,
+                question: "¿Qué es la porción de Red y qué es la porción de hosts?",
+                options: [
+                    "A) La porción de red indica el puerto lógico y la de hosts el protocolo utilizado.",
+                    "B) La porción de red identifica la red específica y la porción de hosts identifica de forma única al dispositivo dentro de esa red.",
+                    "C) La porción de red asigna la velocidad y la de hosts limita la cantidad de usuarios.",
+                    "D) La porción de red es la dirección MAC y la de hosts es el DNS."
+                ],
+                answer: 1,
+                explanation: "Una dirección IP se divide en una parte para agrupar la subred común y otra parte para diferenciar a cada equipo."
+            },
+            {
+                id: 12,
+                question: "¿De cuántos bits es la máscara de red 255.255.255.0?",
+                options: [
+                    "A) Es de 16 bits (escrita como /16).",
+                    "B) Es de 32 bits (escrita como /32).",
+                    "C) Es de 24 bits (escrita como /24).",
+                    "D) Es de 8 bits (escrita como /8)."
+                ],
+                answer: 2,
+                explanation: "255.255.255.0 representa en binario 24 unos consecutivos, equivalentes a un prefijo de red /24."
+            },
+            {
+                id: 13,
+                question: "¿Qué es loopback y para qué se utiliza?",
+                options: [
+                    "A) Una técnica para amplificar redes Wi-Fi lejanas.",
+                    "B) Un tipo de cable trenzado para conectar dos conmutadores.",
+                    "C) Un puerto físico adicional reservado para mantenimiento.",
+                    "D) Una dirección IP especial (127.0.0.1) para diagnóstico interno y probar la pila de protocolos TCP/IP sin enviar datos a la red."
+                ],
+                answer: 3,
+                explanation: "La interfaz loopback devuelve las transmisiones al propio sistema para probar su tarjeta de red interna."
+            },
+            {
+                id: 14,
+                question: "¿Qué es CIDR y su ventaja?",
+                options: [
+                    "A) Enrutamiento con clase estricto que obliga a usar solo redes Clase A, B o C.",
+                    "B) Enrutamiento sin clase que permite asignar bloques de direcciones IP con máscaras de longitud variable, evitando el desperdicio de direcciones IP.",
+                    "C) Un protocolo de seguridad que reemplaza a las contraseñas WPA3.",
+                    "D) Un estándar de compresión de archivos multimedia en redes locales."
+                ],
+                answer: 1,
+                explanation: "CIDR elimina el rígido sistema de clases fijas (A, B, C), optimizando el aprovechamiento del espacio de direcciones IP."
+            },
+            {
+                id: 15,
+                question: "¿Qué es un enrutamiento estático y dinámico?",
+                options: [
+                    "A) Estático es la configuración manual de rutas (no cambia sola) y dinámico es cuando los routers aprenden y actualizan rutas automáticamente.",
+                    "B) El estático se usa en redes inalámbricas y el dinámico solo en fibra óptica.",
+                    "C) El estático cambia las rutas cada hora y el dinámico no se altera nunca.",
+                    "D) El estático es controlado por el cliente y el dinámico por el proveedor ISP únicamente."
+                ],
+                answer: 0,
+                explanation: "El enrutamiento estático requiere intervención del administrador, mientras que el dinámico usa protocolos autónomos."
+            },
+            {
+                id: 16,
+                question: "¿Qué es el RIPv2 y cuáles son sus características?",
+                options: [
+                    "A) Protocolo de estado de enlace usado para redes globales sin soporte de claves.",
+                    "B) Protocolo exclusivo de fibra óptica con límite ilimitado de distancia.",
+                    "C) Protocolo de enrutamiento básico para redes pequeñas; soporta VLSM, usa multicast y tiene autenticación.",
+                    "D) Sistema de asignación automática de IP basado en direcciones físicas MAC."
+                ],
+                answer: 2,
+                explanation: "RIPv2 mejoró a RIPv1 añadiendo compatibilidad con VLSM, actualización mediante multicast y opciones de autenticación."
+            },
+            {
+                id: 17,
+                question: "¿Cuál es el límite de saltos del RIPv2?",
+                options: [
+                    "A) 255 saltos máximo.",
+                    "B) 100 saltos máximo.",
+                    "C) 15 saltos máximo (16 es inalcanzable).",
+                    "D) Sin límite de saltos."
+                ],
+                answer: 2,
+                explanation: "RIPv2 utiliza el conteo de saltos como métrica con un tope de 15; un valor de 16 se considera una red inalcanzable."
+            },
+            {
+                id: 18,
+                question: "¿Qué es EIGRP y sus características?",
+                options: [
+                    "A) Protocolo estándar abierto que solo mide la cantidad de dispositivos conectados.",
+                    "B) Protocolo de enrutamiento avanzado de Cisco, muy rápido (usa algoritmo DUAL) y calcula rutas por ancho de banda y retardo.",
+                    "C) Algoritmo sencillo de enrutamiento estático sin soporte para subredes.",
+                    "D) Protocolo de la capa de aplicación para la transferencia segura de archivos."
+                ],
+                answer: 1,
+                explanation: "EIGRP es un protocolo vectorial de distancia avanzado desarrollado por Cisco que destaca por su rápida convergencia con DUAL."
+            },
+            {
+                id: 19,
+                question: "¿Cuál es la métrica utilizada por RIPv2?",
+                options: [
+                    "A) Ancho de banda y velocidad de reloj.",
+                    "B) Latencia estimada en milisegundos.",
+                    "C) Conteo de Saltos (Hop Count).",
+                    "D) Costo de enlace basado en gigabits."
+                ],
+                answer: 2,
+                explanation: "RIPv2 evalúa el mejor camino únicamente contando la cantidad de routers o saltos necesarios para alcanzar el destino."
+            },
+            {
+                id: 20,
+                question: "¿Cuál es la diferencia entre FLSM y VLSM?",
+                options: [
+                    "A) FLSM asigna a todas las subredes el mismo tamaño (máscara fija) y VLSM asigna diferentes tamaños según las necesidades de hosts (máscara variable).",
+                    "B) FLSM se usa en IPv6 y VLSM exclusivamente en IPv4.",
+                    "C) FLSM es dinámico y VLSM es estrictamente manual.",
+                    "D) No hay diferencia, ambos términos son sinónimos exactos."
+                ],
+                answer: 0,
+                explanation: "FLSM divide la red en partes idénticas mientras que VLSM permite optimizar subredes adaptando la máscara al número real de hosts."
+            },
+            {
+                id: 21,
+                question: "¿Cuál es la fórmula para calcular el número de hosts?",
+                options: [
+                    "A) 2^n - 2 (donde n es el número de bits dedicados a hosts).",
+                    "B) 2^n + 2 (donde n es la cantidad de routers intermedios).",
+                    "C) 256 - n (donde n es el número de la subred actual).",
+                    "D) n^2 - 1 (donde n es la cantidad de octetos de la máscara)."
+                ],
+                answer: 0,
+                explanation: "Se resta 2 porque la primera dirección identifica la red y la última se reserva para la dirección de broadcast."
+            },
+            {
+                id: 22,
+                question: "¿Cómo se definen la Dirección de Red y la Dirección de Broadcast?",
+                options: [
+                    "A) Dirección de red: asignada al servidor DNS; Broadcast: asignada al puerto del switch.",
+                    "B) La dirección de red es la primera dirección IP de la subred y la de broadcast es la última (envía datos a todos los hosts).",
+                    "C) Dirección de red: la dirección del router; Broadcast: el rango de puertos disponibles.",
+                    "D) Dirección de red: cualquier IP par; Broadcast: cualquier IP impar de la subred."
+                ],
+                answer: 1,
+                explanation: "La IP inicial representa la identificación del segmento y la IP final emite tráfico simultáneo hacia todos los miembros."
+            },
+            {
+                id: 23,
+                question: "¿Para qué se utiliza el subneteo?",
+                options: [
+                    "A) Para aumentar la velocidad física del cable de red sin cambiar hardware.",
+                    "B) Para convertir direcciones IPv4 en direcciones de última generación IPv6.",
+                    "C) Para dividir una red grande en redes más pequeñas, optimizando el rendimiento y la seguridad.",
+                    "D) Para evitar el pago de servicios de Internet a proveedores públicos."
+                ],
+                answer: 2,
+                explanation: "El subneteo reduce los dominios de difusión, mejorando el rendimiento de red y el aislamiento de seguridad."
+            }
+        ];
+
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+
+            questionsData.forEach((q, index) => {
+                const qCard = document.createElement('div');
+                qCard.className = "bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 hover:shadow-md transition";
+                qCard.id = `q-card-${q.id}`;
+
+                let optionsHTML = '';
+                q.options.forEach((opt, optIndex) => {
+                    optionsHTML += `
+                        <label id="label-q${q.id}-opt${optIndex}" 
+                               class="option-card flex items-start p-3.5 rounded-xl border border-slate-200 cursor-pointer text-sm font-medium text-slate-700 bg-slate-50/50">
+                            <input type="radio" 
+                                   name="question-${q.id}" 
+                                   value="${optIndex}" 
+                                   onchange="onSelectOption(${q.id})" 
+                                   class="mt-0.5 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-300">
+                            <span class="ml-3 select-none">${opt}</span>
+                        </label>
+                    `;
+                });
+
+                qCard.innerHTML = `
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
+                            Pregunta ${index + 1} de ${questionsData.length}
+                        </span>
+                        <span id="badge-q${q.id}" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500">
+                            Pendiente
+                        </span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-slate-900 mb-4">${q.question}</h3>
+                    <div class="grid grid-cols-1 gap-2.5 mb-4">
+                        ${optionsHTML}
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pt-3 border-t border-slate-100 gap-2">
+                        <button type="button" 
+                                onclick="checkSingleQuestion(${q.id})" 
+                                class="w-fit text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition">
+                            Comprobar esta respuesta
+                        </button>
+                        <div id="feedback-q${q.id}" class="text-xs font-medium hidden"></div>
+                    </div>
+                `;
+
+                container.appendChild(qCard);
+            });
         }
-    ];
 
-    let currentQuestion = 0;
-    let score = 0;
-    let userAnswers = new Array(questions.length).fill(null);
+        function onSelectOption(qId) {
+            updateProgress();
+        }
 
-    const quizContainer = document.getElementById('quiz-container');
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
-    const progressBar = document.getElementById('progress-bar');
-
-    function renderQuiz() {
-        quizContainer.innerHTML = '';
-        questions.forEach((q, index) => {
-            const card = document.createElement('div');
-            card.className = `question-card ${index === 0 ? 'active' : ''}`;
-            card.id = `q-${index}`;
-
-            const title = document.createElement('div');
-            title.className = 'question-title';
-            title.innerText = q.question;
-            card.appendChild(title);
-
-            const optionsContainer = document.createElement('div');
-            optionsContainer.className = 'options-container';
-
-            q.options.forEach((opt, optIdx) => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerText = opt;
-                btn.onclick = () => selectOption(index, optIdx);
-                optionsContainer.appendChild(btn);
+        function updateProgress() {
+            let answered = 0;
+            questionsData.forEach(q => {
+                const selected = document.querySelector(`input[name="question-${q.id}"]:checked`);
+                if (selected) answered++;
             });
 
-            card.appendChild(optionsContainer);
+            document.getElementById('answered-count').innerText = answered;
+            const percent = (answered / questionsData.length) * 100;
+            document.getElementById('top-progress').style.width = `${percent}%`;
+        }
 
-            const feedback = document.createElement('div');
-            feedback.className = 'feedback';
-            feedback.id = `feedback-${index}`;
-            card.appendChild(feedback);
+        function checkSingleQuestion(qId) {
+            const q = questionsData.find(item => item.id === qId);
+            const selected = document.querySelector(`input[name="question-${q.id}"]:checked`);
+            const badge = document.getElementById(`badge-q${qId}`);
+            const feedback = document.getElementById(`feedback-q${qId}`);
 
-            quizContainer.appendChild(card);
-        });
-        updateProgress();
-    }
-
-    function selectOption(questionIdx, optionIdx) {
-        if (userAnswers[questionIdx] !== null) return;
-
-        userAnswers[questionIdx] = optionIdx;
-        const q = questions[questionIdx];
-        const card = document.getElementById(`q-${questionIdx}`);
-        const buttons = card.querySelectorAll('.option-btn');
-        const feedback = document.getElementById(`feedback-${questionIdx}`);
-
-        buttons.forEach((btn, idx) => {
-            btn.disabled = true;
-            if (idx === q.correct) {
-                btn.classList.add('correct');
+            if (!selected) {
+                feedback.innerText = "Por favor selecciona una respuesta.";
+                feedback.className = "text-xs font-semibold text-amber-600 block";
+                return;
             }
-            if (idx === optionIdx && optionIdx !== q.correct) {
-                btn.classList.add('incorrect');
+
+            const selectedVal = parseInt(selected.value);
+
+            // Clean options style
+            q.options.forEach((_, optIdx) => {
+                const label = document.getElementById(`label-q${qId}-opt${optIdx}`);
+                label.classList.remove('correct-bg', 'incorrect-bg');
+            });
+
+            if (selectedVal === q.answer) {
+                document.getElementById(`label-q${qId}-opt${selectedVal}`).classList.add('correct-bg');
+                badge.innerText = "¡Correcto!";
+                badge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700";
+                feedback.innerHTML = `<strong>¡Correcto!</strong> ${q.explanation}`;
+                feedback.className = "text-xs font-normal text-emerald-700 bg-emerald-50 p-2.5 rounded-lg border border-emerald-200 block mt-2";
+            } else {
+                document.getElementById(`label-q${qId}-opt${selectedVal}`).classList.add('incorrect-bg');
+                document.getElementById(`label-q${qId}-opt${q.answer}`).classList.add('correct-bg');
+
+                badge.innerText = "Incorrecto";
+                badge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-red-100 text-red-700";
+                feedback.innerHTML = `<strong>Incorrecto.</strong> ${q.explanation}`;
+                feedback.className = "text-xs font-normal text-red-700 bg-red-50 p-2.5 rounded-lg border border-red-200 block mt-2";
             }
-        });
 
-        if (optionIdx === q.correct) {
-            score++;
-            feedback.innerText = "¡Respuesta Correcta! " + q.explanation;
-            feedback.className = "feedback correct";
-        } else {
-            feedback.innerText = "Respuesta Incorrecta. " + q.explanation;
-            feedback.className = "feedback incorrect";
-        }
-    }
-
-    function showQuestion(index) {
-        document.querySelectorAll('.question-card').forEach((card, idx) => {
-            card.classList.toggle('active', idx === index);
-        });
-
-        prevBtn.disabled = index === 0;
-        
-        if (index === questions.length - 1) {
-            nextBtn.innerText = "Finalizar Examen";
-        } else {
-            nextBtn.innerText = "Siguiente";
+            calculateScore();
         }
 
-        updateProgress();
-    }
-
-    function nextQuestion() {
-        if (currentQuestion < questions.length - 1) {
-            currentQuestion++;
-            showQuestion(currentQuestion);
-        } else {
-            showResults();
+        function calculateScore() {
+            let correctCount = 0;
+            questionsData.forEach(q => {
+                const selected = document.querySelector(`input[name="question-${q.id}"]:checked`);
+                if (selected && parseInt(selected.value) === q.answer) {
+                    correctCount++;
+                }
+            });
+            document.getElementById('score-badge').innerText = `${correctCount} / ${questionsData.length}`;
+            return correctCount;
         }
-    }
 
-    function prevQuestion() {
-        if (currentQuestion > 0) {
-            currentQuestion--;
-            showQuestion(currentQuestion);
+        function evaluateAll() {
+            let totalCorrect = 0;
+
+            questionsData.forEach(q => {
+                const selected = document.querySelector(`input[name="question-${q.id}"]:checked`);
+                const badge = document.getElementById(`badge-q${q.id}`);
+                const feedback = document.getElementById(`feedback-q${q.id}`);
+
+                q.options.forEach((_, optIdx) => {
+                    const label = document.getElementById(`label-q${q.id}-opt${optIdx}`);
+                    label.classList.remove('correct-bg', 'incorrect-bg');
+                });
+
+                if (selected) {
+                    const selectedVal = parseInt(selected.value);
+                    if (selectedVal === q.answer) {
+                        totalCorrect++;
+                        document.getElementById(`label-q${q.id}-opt${selectedVal}`).classList.add('correct-bg');
+                        badge.innerText = "¡Correcto!";
+                        badge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700";
+                        feedback.innerHTML = `<strong>¡Correcto!</strong> ${q.explanation}`;
+                        feedback.className = "text-xs font-normal text-emerald-700 bg-emerald-50 p-2.5 rounded-lg border border-emerald-200 block mt-2";
+                    } else {
+                        document.getElementById(`label-q${q.id}-opt${selectedVal}`).classList.add('incorrect-bg');
+                        document.getElementById(`label-q${q.id}-opt${q.answer}`).classList.add('correct-bg');
+                        badge.innerText = "Incorrecto";
+                        badge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-red-100 text-red-700";
+                        feedback.innerHTML = `<strong>Incorrecto.</strong> ${q.explanation}`;
+                        feedback.className = "text-xs font-normal text-red-700 bg-red-50 p-2.5 rounded-lg border border-red-200 block mt-2";
+                    }
+                } else {
+                    document.getElementById(`label-q${q.id}-opt${q.answer}`).classList.add('correct-bg');
+                    badge.innerText = "Sin responder";
+                    badge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700";
+                    feedback.innerHTML = `<strong>Sin responder.</strong> ${q.explanation}`;
+                    feedback.className = "text-xs font-normal text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200 block mt-2";
+                }
+            });
+
+            // Display result modal
+            const resultsModal = document.getElementById('results-modal');
+            const scoreText = document.getElementById('score-text');
+            const feedbackMessage = document.getElementById('feedback-message');
+
+            resultsModal.classList.remove('hidden');
+            scoreText.innerText = `${totalCorrect} / ${questionsData.length}`;
+            document.getElementById('score-badge').innerText = `${totalCorrect} / ${questionsData.length}`;
+
+            const percentage = (totalCorrect / questionsData.length) * 100;
+
+            if (percentage === 100) {
+                feedbackMessage.innerText = "¡Puntaje Perfecto! Has respondido correctamente las 23 preguntas.";
+                if (typeof confetti === 'function') confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+            } else if (percentage >= 75) {
+                feedbackMessage.innerText = "¡Muy buen desempeño! Dominas la mayoría de los conceptos de redes.";
+            } else if (percentage >= 50) {
+                feedbackMessage.innerText = "Has aprobado el cuestionario, pero te recomendamos revisar las explicaciones resaltadas.";
+            } else {
+                feedbackMessage.innerText = "Te recomendamos repasar los apuntes de redes e intentarlo nuevamente.";
+            }
+
+            resultsModal.scrollIntoView({ behavior: 'smooth' });
         }
-    }
 
-    function updateProgress() {
-        const progress = ((currentQuestion + 1) / questions.length) * 100;
-        progressBar.style.width = `${progress}%`;
-    }
+        function resetQuiz() {
+            document.getElementById('quiz-form').reset();
+            document.getElementById('results-modal').classList.add('hidden');
+            document.getElementById('score-badge').innerText = "0";
+            document.getElementById('answered-count').innerText = "0";
+            document.getElementById('top-progress').style.width = "0%";
 
-    function showResults() {
-        document.getElementById('quiz-container').style.display = 'none';
-        document.getElementById('controls').style.display = 'none';
-        document.getElementById('progress-container').style.display = 'none';
+            questionsData.forEach(q => {
+                const badge = document.getElementById(`badge-q${q.id}`);
+                const feedback = document.getElementById(`feedback-q${q.id}`);
+                badge.innerText = "Pendiente";
+                badge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500";
+                feedback.classList.add('hidden');
 
-        const resultsContainer = document.getElementById('results-container');
-        resultsContainer.style.display = 'block';
+                q.options.forEach((_, optIdx) => {
+                    const label = document.getElementById(`label-q${q.id}-opt${optIdx}`);
+                    label.classList.remove('correct-bg', 'incorrect-bg');
+                });
+            });
 
-        const scoreText = document.getElementById('score-text');
-        scoreText.innerText = `${score} / ${questions.length}`;
-
-        const percentage = (score / questions.length) * 100;
-        const feedbackMsg = document.getElementById('feedback-message');
-
-        if (percentage >= 85) {
-            feedbackMsg.innerText = "¡Excelente nivel analítico! Tienes una comprensión sólida y profunda del contenido de la guía.";
-            feedbackMsg.style.color = "var(--success)";
-        } else if (percentage >= 65) {
-            feedbackMsg.innerText = "Buen desempeño. Has dominado los conceptos generales, pero te conviene repasar las sutilezas entre los tipos de controles y los elementos del programa.";
-            feedbackMsg.style.color = "var(--secondary)";
-        } else {
-            feedbackMsg.innerText = "Nivel insuficiente. Se recomienda volver a estudiar la guía analizando las diferencias entre preventivo/detectivo/correctivo y la planificación.";
-            feedbackMsg.style.color = "var(--danger)";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-    }
 
-    function restartQuiz() {
-        currentQuestion = 0;
-        score = 0;
-        userAnswers = new Array(questions.length).fill(null);
-
-        document.getElementById('quiz-container').style.display = 'block';
-        document.getElementById('controls').style.display = 'flex';
-        document.getElementById('progress-container').style.display = 'block';
-        document.getElementById('results-container').style.display = 'none';
-
-        renderQuiz();
-        showQuestion(0);
-    }
-
-    renderQuiz();
-</script>
-
+        window.onload = function() {
+            renderQuestions();
+        };
+    </script>
 </body>
 </html>
