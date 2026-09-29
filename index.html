@@ -28,7 +28,7 @@
 <body>
   <header>
     <h1>Cuestionario de etiquetas HTML</h1>
-    <p>Guía de Programación IV, páginas 30 a 44. Elige una opción por pregunta.</p>
+    <p>Guía de Programación IV, páginas 30 a 44. Elige una opción: verás al instante si acertaste.</p>
   </header>
  
   <main>
@@ -248,6 +248,7 @@
           inp.type = "radio";
           inp.name = "p" + n;
           inp.value = op;
+          inp.addEventListener("change", function () { responder(n); });
           lab.appendChild(inp);
           lab.appendChild(document.createTextNode(" " + op));
           sec.appendChild(lab);
@@ -256,28 +257,32 @@
       });
     }
  
+    function responder(n) {
+      var p = preguntas[n];
+      var sec = form.querySelectorAll("section.q")[n];
+      var marcada = form.querySelector("input[name=p" + n + "]:checked");
+      form.querySelectorAll("input[name=p" + n + "]").forEach(function (inp) {
+        inp.disabled = true;
+        if (inp.value === p[1]) inp.parentNode.classList.add("ok");
+        else if (inp.checked) inp.parentNode.classList.add("bad");
+      });
+      if (marcada && marcada.value !== p[1]) {
+        var caja = document.createElement("div");
+        caja.className = "exp";
+        var b = document.createElement("strong");
+        b.textContent = "Respuesta correcta: ";
+        caja.appendChild(b);
+        caja.appendChild(document.createTextNode(p[1] + ". " + (explicaciones[n] || "")));
+        sec.appendChild(caja);
+      }
+    }
+ 
     function calificar() {
       var aciertos = 0, sinResponder = 0;
       preguntas.forEach(function (p, n) {
         var marcada = form.querySelector("input[name=p" + n + "]:checked");
         if (!marcada) sinResponder++;
-        form.querySelectorAll("input[name=p" + n + "]").forEach(function (inp) {
-          inp.disabled = true;
-          var lab = inp.parentNode;
-          if (inp.value === p[1]) lab.classList.add("ok");
-          else if (inp.checked) lab.classList.add("bad");
-        });
-        if (marcada && marcada.value === p[1]) {
-          aciertos++;
-        } else if (marcada) {
-          var caja = document.createElement("div");
-          caja.className = "exp";
-          var b = document.createElement("strong");
-          b.textContent = "Respuesta correcta: ";
-          caja.appendChild(b);
-          caja.appendChild(document.createTextNode(p[1] + ". " + (explicaciones[n] || "")));
-          form.querySelectorAll("section.q")[n].appendChild(caja);
-        }
+        else if (marcada.value === p[1]) aciertos++;
       });
       resultado.textContent = "Puntaje: " + aciertos + " de " + preguntas.length +
         (sinResponder ? " (" + sinResponder + " sin responder)" : "");
@@ -293,3 +298,4 @@
   </script>
 </body>
 </html>
+ 
