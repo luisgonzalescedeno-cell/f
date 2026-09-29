@@ -17,6 +17,8 @@
     label:hover { background: #eef2f8; }
     label.ok { background: #d4f5dc; }
     label.bad { background: #ffd9d9; }
+    h2 { background: #1d2733; color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 1.05rem; margin: 26px 0 12px; }
+    #detalle { max-width: 520px; margin: 0 auto 20px; }
     .exp { margin-top: 8px; padding: 8px 10px; background: #fff3cd; border-left: 4px solid #e0a800; border-radius: 4px; font-size: .92rem; }
     .botones { text-align: center; margin: 20px 0; }
     button { font-size: 1rem; padding: 10px 22px; margin: 0 6px; border: 0; border-radius: 6px; background: #e34f26; color: #fff; cursor: pointer; }
@@ -38,6 +40,7 @@
       <button type="button" id="btnReiniciar" class="sec">Reiniciar</button>
     </div>
     <p id="resultado"></p>
+    <ul id="detalle"></ul>
   </main>
  
   <footer>
@@ -217,9 +220,91 @@
       "<search> representa las partes del documento con controles de formulario u otro contenido relacionado con una operación de búsqueda o filtrado."
     ];
  
+    // Secciones (mismo orden que la guía) con los índices de sus preguntas
+    var secciones = [
+      ["Lenguaje HTML", [0,1,2,3]],
+      ["Historia", [4,5]],
+      ["Estructura de un documento HTML", [6,7,8]],
+      ["Estructura de una página web", []],
+      ["HTML5 y código HTML5", []],
+      ["Etiquetas comunes", [9,10,11,12,13,14,15,16,17,18,19,20,21]],
+      ["La cabecera HTML", [22,23,24,25,26]],
+      ["El cuerpo del documento HTML", []],
+      ["Etiquetas HTML: comentarios", [27]],
+      ["Formato de textos", [28,29,30,31]],
+      ["Formato de párrafos", [32]],
+      ["Creación de listas", [33,34]],
+      ["Creación de enlaces", [35]],
+      ["Imágenes", [36,37,38]],
+      ["Tablas", [39,40,41]],
+      ["Archivos multimedia", [42,43]],
+      ["El elemento Inline Frame", [44]],
+      ["Formularios y procesamiento de formularios", [45,46,47,48]],
+      ["Etiquetas de formulario y tipos de input", [49,50,51,52,53,54,55,56,57,58]],
+      ["Nuevos tipos de controles de entrada", [59,60,61,62,63]],
+      ["Nuevos atributos para las etiquetas", [64,65,66,67]],
+      ["Atributos de las etiquetas input", [68,69,70,71]],
+      ["Etiquetas semánticas HTML5", [72,73,74,75,76,77,78,79,80,81]]
+    ];
+    function nq(s, q, a, b, c, d, e) {
+      preguntas.push([q, a, b, c, d]);
+      explicaciones.push(e);
+      secciones[s][1].push(preguntas.length - 1);
+    }
+    nq(0, "HTML se usa para describir:", "La estructura y el contenido en forma de texto, complementado con objetos como imágenes", "Solo cálculos matemáticos", "Únicamente bases de datos", "La compilación de programas", "HTML describe la estructura y el contenido en forma de texto, y complementa el texto con objetos tales como imágenes.");
+    nq(0, "En el esquema de la guía, ¿a qué corresponde \"Hipertexto\"?", "ENLACES", "Marcas", "Compilador", "Imágenes", "En el esquema, Marcas es el lenguaje de etiquetas e Hipertexto corresponde a enlaces.");
+    nq(1, "¿Qué ocurrió con HTML durante la década de 1990?", "Proliferó con el crecimiento explosivo de la Web", "Dejó de utilizarse", "Pasó a ser un lenguaje compilado", "Fue reemplazado por Java", "Durante la década de 1990 HTML proliferó con el crecimiento explosivo de la Web.");
+    nq(1, "¿Por qué se trabaja en conjunto sobre las especificaciones de HTML?", "Porque la web depende de que autores y compañías compartan las mismas convenciones de HTML", "Porque cada navegador usa etiquetas distintas", "Porque HTML debe compilarse", "Porque solo existe un autor", "La web depende de los autores de páginas web y de que las compañías compartan las mismas convenciones de HTML; eso motivó el trabajo conjunto.");
+    nq(2, "¿Qué contiene la zona HEAD?", "Información o configuración del documento, que generalmente no se ve al navegar", "El contenido que el usuario va a visualizar", "Solo imágenes y videos", "Los formularios de la página", "En HEAD reside información o configuración acerca del documento HTML, y generalmente no se ve cuando se navega por él.");
+    nq(3, "¿Con qué compara la guía la estructura de una página web?", "Con la estructura del cuerpo humano", "Con una tabla de multiplicar", "Con un árbol genealógico", "Con un edificio", "Ambos están organizados en partes con funciones específicas, que trabajan juntas para que todo funcione correctamente.");
+    nq(3, "¿Cuántas barras laterales puede contener el cuerpo (body) de una página?", "1 o 2", "Ninguna", "Exactamente 4", "Más de 10", "El cuerpo (body) puede contener 1 o 2 barras laterales.");
+    nq(3, "¿Por qué existen páginas web sin barras laterales?", "Están enfocadas a dispositivos móviles: la pantalla es vertical y el espacio horizontal es limitado", "Porque HTML5 las prohíbe", "Porque solo son para computadoras de escritorio", "Porque no tienen cuerpo (body)", "Existen páginas sin barras laterales enfocadas a dispositivos móviles, ya que la pantalla del celular es vertical y el espacio horizontal es limitado.");
+    nq(3, "Según la estructura actual, ¿cuáles son las partes de una página web?", "Menú, header o cabecera, contenido o cuerpo, y footer o pie de página", "Solo head y body", "Título, párrafo y tabla", "Formulario, tabla e imagen", "La estructura actual mostrada en la guía es: menú, header o cabecera, contenido o cuerpo, y footer o pie de página.");
+    nq(4, "¿Qué hace el estándar HTML5?", "Especifica qué marcas deben utilizarse para escribir un documento web y qué significa cada una", "Compila el código HTML", "Reemplaza al navegador", "Crea las imágenes de la página", "Así, cualquier navegador sabrá cómo interpretarlas.");
+    nq(4, "En el código HTML5 de ejemplo, ¿qué texto se muestra en el <h1>?", "Hola Mundo!", "Mi sitio web", "Título de la sección", "Barra lateral", "En el código HTML5 de ejemplo, <title> y <h1> contienen \"Hola Mundo!\".");
+    nq(4, "En el código HTML5 de \"Hola Mundo!\", ¿qué atributo lleva la etiqueta <html>?", "lang='es'", "charset='utf-8'", "name='es'", "src='es'", "El ejemplo usa <html lang=\"es\">; charset='utf-8' va en <meta>.");
+    nq(5, "¿Qué es <table>?", "La etiqueta principal para crear una tabla", "La etiqueta que define una fila", "La etiqueta que define un formulario", "La etiqueta que define un párrafo", "<table> es la etiqueta principal para crear una tabla.");
+    nq(5, "¿Qué hace <form>?", "Define un formulario dentro de una página web", "Crea un vínculo a otro recurso", "Crea un salto de línea", "Define un campo de ingreso de datos", "<form> define un formulario dentro de una página web.");
+    nq(5, "¿Qué hace <input>?", "Define un campo de ingreso de datos dentro de una página web", "Define un formulario", "Crea un rótulo de un input", "Permite visualizar imágenes", "<input> define un campo de ingreso de datos dentro de una página web.");
+    nq(5, "¿Qué hace <link>?", "Crea un vínculo que hace referencia a otro recurso de la página web", "Crea un salto de línea", "Define una fila de tabla", "Crea un contenedor", "<link> crea un vínculo que hace referencia a otro recurso de la página web.");
+    nq(6, "¿Qué proporcionan los metadatos <meta>?", "Metainformación sobre el documento, procesable automáticamente por programas que analicen la página", "El contenido visible de la página", "Las imágenes de la página", "El color del texto", "Los metadatos proporcionan metainformación sobre el documento (información procesable automáticamente por programas que analicen la página).");
+    nq(6, "¿Qué atributos usa normalmente <meta>?", "name (tipo de metadato) y content (valor)", "src y href", "action y method", "width y height", "Normalmente usan name para definir un tipo de metadato y content para definir el valor.");
+    nq(6, "¿Qué indica el metadato author?", "El autor de la página", "La codificación del documento", "Las palabras clave", "El título de la pestaña", "author indica el autor de la página.");
+    nq(7, "Para estructurar una web en bloques (cabecera, barra lateral, contenido, pie), ¿qué elemento suele utilizarse según la guía?", "<div> o división", "<br>", "<font>", "<u>", "Para hacer esta estructuración suele utilizarse el elemento <div> o división.");
+    nq(7, "¿Qué rodean las etiquetas <body> y </body>?", "El contenido visible de la página", "La configuración del documento", "Solo los metadatos", "Solo los scripts", "Las etiquetas <body> y </body> rodean el contenido visible de la página.");
+    nq(7, "¿Qué define <body bgcolor=\"#RRGGBB\">?", "El color de fondo de la página", "El color del texto", "El borde de la tabla", "El tipo de fuente", "<body bgcolor=\"#RRGGBB\"> define el color de fondo de la página.");
+    nq(9, "¿Qué hace <font face=\"arial\">?", "Determina el tipo de fuente de texto (tipografía)", "Define el color del texto", "Aplica negrita", "Establece el tamaño de una imagen", "<font face> determina el tipo de fuente de texto, es decir, la tipografía.");
+    nq(9, "¿Qué tres parámetros puede incluir <font>?", "Tamaño, fuente y color", "Ancho, alto y borde", "Alineación, espacio y título", "Fila, columna y celda", "La etiqueta <font> puede incluir los tres parámetros: tamaño, fuente y color.");
+    nq(9, "¿Cuántos niveles de encabezado indican h1 a h6?", "6", "3", "4", "10", "h1, h2, h3, h4, h5, h6 indican 6 niveles; <h1> delimita la fuente de mayor tamaño.");
+    nq(10, "¿Qué hace <p align='center'>?", "Texto del párrafo con alineación centrada", "Texto justificado", "Alineado a la derecha", "Alineado a la izquierda", "align='center' da al texto del párrafo alineación centrada.");
+    nq(10, "¿Qué hace <p align='right'>?", "Párrafo alineado a la derecha", "Párrafo alineado a la izquierda", "Alineación centrada", "Alineación justificada", "align='right' alinea el párrafo a la derecha.");
+    nq(10, "¿Para qué se utiliza <div> en el formato de párrafos?", "Para delimitar una sección y agrupar elementos, y añadirles un estilo u operar sobre ese bloque", "Para introducir un salto de línea", "Para insertar una línea horizontal", "Para incrustar un video", "<div> delimita una sección del documento, agrupando elementos para añadirles un estilo determinado o realizar operaciones sobre ese bloque.");
+    nq(11, "¿Qué etiqueta define cada elemento dentro de una lista <ul> u <ol>?", "<li>", "<td>", "<th>", "<tr>", "En los ejemplos de la guía, cada elemento de la lista va dentro de <li>.");
+    nq(12, "Al pulsar un enlace <a href=\"http://www.ejemplo.com\">, ¿qué ocurre?", "Se va al vínculo indicado en la dirección de href", "Se abre una ventana para enviar un correo", "Se muestra una imagen", "Se borra el formulario", "Se va al vínculo indicado en la dirección de href.");
+    nq(13, "¿Qué hace <img ... border=\"X\">?", "Establece un borde de X píxeles en torno a la imagen", "Establece el tamaño de la imagen", "Muestra un texto al pasar el ratón", "Alinea la imagen", "border establece un borde de X píxeles en torno a la imagen.");
+    nq(13, "¿Qué hace <img ... align=\"left\">?", "Alineación izquierda de la imagen en el párrafo", "Alineación derecha de la imagen", "Alineación inferior respecto al texto", "Alineación superior respecto al texto", "align=\"left\" es la alineación izquierda de la imagen en el párrafo.");
+    nq(13, "¿Qué indican hspace y vspace en <img>?", "hspace: espacio horizontal y vspace: espacio vertical, en píxeles, entre la imagen y el texto", "hspace: altura y vspace: anchura de la imagen", "hspace: borde y vspace: título", "hspace: alineación superior y vspace: inferior", "hspace es el espacio horizontal y vspace el espacio vertical, en píxeles, entre la imagen y el texto.");
+    nq(14, "¿Qué determina <table width=\"X\">?", "La anchura de la tabla, en píxeles o en porcentaje", "La altura de la tabla", "El grosor del borde", "El espacio entre celdas", "width determina la anchura de la tabla; puede darse en píxeles o en porcentaje.");
+    nq(14, "¿Qué determina <table height=\"X\">?", "La altura de la tabla en píxeles", "La anchura de la tabla", "El espacio entre el borde y el texto", "El grosor del borde", "height determina la altura de la tabla en píxeles.");
+    nq(15, "¿Qué dos elementos incluye HTML5 en el propio lenguaje para añadir audio y vídeo?", "<audio> y <video>", "<img> y <link>", "<iframe> y <form>", "<a> y <div>", "HTML5 incluye los elementos <video> y <audio> para añadir vídeo y audio a las páginas.");
+    nq(17, "¿Qué es un formulario?", "Un área especial de interactividad con elementos que reciben la respuesta a una o varias preguntas formuladas al usuario", "Una imagen con hipervínculos", "Un archivo de audio", "Un comentario en el código", "Un formulario es un área especial de interactividad donde se insertan elementos como cajas de texto, botones de opción o listas desplegables.");
+    nq(17, "¿Dónde deben estar definidos los elementos que reciben los datos de un formulario?", "Dentro de la apertura y cierre de la etiqueta <form>", "Dentro de <head>", "Dentro de <title>", "Fuera de cualquier etiqueta", "Los elementos que reciban los datos deberán estar definidos dentro de la apertura y cierre de la etiqueta <form>.");
+    nq(17, "¿Para qué sirve un formulario HTML?", "Para que los usuarios introduzcan datos y los envíen a un servidor web o de correo", "Para incrustar videos", "Para definir el color de fondo", "Para crear listas numeradas", "Sirve para que los usuarios introduzcan una serie de datos y los envíen a un servidor web o a un servidor de correo.");
+    nq(18, "¿Qué tipo de input es una entrada de texto?", "text", "password", "hidden", "reset", "text es la entrada de texto.");
+    nq(19, "¿Qué input sirve para introducir una dirección web (URL)?", "<input type=\"url\">", "<input type=\"date\">", "<input type=\"range\">", "<input type=\"color\">", "type=\"url\" sirve para introducir una dirección web; muestra un mensaje de error si se introducen caracteres no válidos.");
+    nq(19, "¿Qué input sirve para introducir un término de búsqueda en la web?", "<input type=\"search\">", "<input type=\"number\">", "<input type=\"email\">", "<input type=\"color\">", "type=\"search\" sirve para introducir un término de búsqueda en la web.");
+    nq(20, "¿Qué atributo permite indicar un valor mínimo para un rango, por ejemplo en input number?", "min", "max", "size", "list", "min permite indicar un valor mínimo para un rango.");
+    nq(20, "¿Qué atributo permite indicar un valor máximo para un rango, por ejemplo en input number?", "max", "min", "size", "pattern", "max permite indicar un valor máximo para un rango.");
+    nq(21, "¿Qué atributo contiene el valor actual del texto ingresado en el campo?", "value", "pattern", "size", "list", "value es un DOMString que contiene el valor actual del texto ingresado en el campo de texto.");
+    nq(21, "¿Qué indica el atributo minlength?", "El número mínimo de caracteres que la entrada puede tener y aún se considera válida", "El número máximo de caracteres", "El ancho del campo", "La revisión ortográfica", "minlength es el número mínimo de caracteres que la entrada puede tener y aún se considera válida.");
+    nq(21, "¿Qué indica el atributo size en un input?", "Cuántos caracteres de ancho debe tener el campo de entrada", "El número máximo de caracteres", "Si es de solo lectura", "El id del datalist", "size es un número que indica cuántos caracteres de ancho debe tener el campo de entrada.");
+    nq(21, "¿Qué controla el atributo spellcheck?", "Si se habilita o no la revisión ortográfica del campo de entrada", "El texto de ayuda del campo", "El máximo de caracteres", "Si el campo es de solo lectura", "spellcheck controla si se habilita o no la revisión ortográfica para el campo de entrada.");
+    nq(22, "En el ejemplo de uso, ¿qué enlaces contiene el <nav>?", "Inicio, Acerca de y Contacto", "Logo, Menú y Footer", "HTML, CSS y JavaScript", "Nombre, Edad y Carrera", "En el ejemplo de uso, el <nav> contiene los enlaces Inicio, Acerca de y Contacto.");
+    nq(22, "En el ejemplo de uso, ¿dentro de qué etiqueta se coloca el <article>?", "Dentro de un <section> (a su vez dentro de <main>)", "Dentro de <header>", "Dentro de <footer>", "Dentro de <aside>", "En el ejemplo, el <article> está dentro de un <section>, que está dentro de <main>.");
+ 
     var form = document.getElementById("cuestionario");
+    var detalle = document.getElementById("detalle");
     var resultado = document.getElementById("resultado");
-    var orden = [];
  
     function mezclar(a) {
       a = a.slice();
@@ -233,33 +318,40 @@
     function dibujar() {
       form.innerHTML = "";
       resultado.textContent = "";
-      orden = [];
-      preguntas.forEach(function (p, n) {
-        var sec = document.createElement("section");
-        sec.className = "q";
-        var h = document.createElement("h3");
-        h.textContent = (n + 1) + ". " + p[0];
-        sec.appendChild(h);
-        var opciones = mezclar(p.slice(1));
-        orden.push(opciones);
-        opciones.forEach(function (op) {
-          var lab = document.createElement("label");
-          var inp = document.createElement("input");
-          inp.type = "radio";
-          inp.name = "p" + n;
-          inp.value = op;
-          inp.addEventListener("change", function () { responder(n); });
-          lab.appendChild(inp);
-          lab.appendChild(document.createTextNode(" " + op));
-          sec.appendChild(lab);
+      detalle.innerHTML = "";
+      var num = 0;
+      secciones.forEach(function (s) {
+        if (!s[1].length) return;
+        var h = document.createElement("h2");
+        h.textContent = s[0] + " (" + s[1].length + ")";
+        form.appendChild(h);
+        s[1].forEach(function (n) {
+          var p = preguntas[n];
+          var sec = document.createElement("section");
+          sec.className = "q";
+          sec.id = "q" + n;
+          var h3 = document.createElement("h3");
+          h3.textContent = (++num) + ". " + p[0];
+          sec.appendChild(h3);
+          mezclar(p.slice(1)).forEach(function (op) {
+            var lab = document.createElement("label");
+            var inp = document.createElement("input");
+            inp.type = "radio";
+            inp.name = "p" + n;
+            inp.value = op;
+            inp.addEventListener("change", function () { responder(n); });
+            lab.appendChild(inp);
+            lab.appendChild(document.createTextNode(" " + op));
+            sec.appendChild(lab);
+          });
+          form.appendChild(sec);
         });
-        form.appendChild(sec);
       });
     }
  
     function responder(n) {
       var p = preguntas[n];
-      var sec = form.querySelectorAll("section.q")[n];
+      var sec = document.getElementById("q" + n);
       var marcada = form.querySelector("input[name=p" + n + "]:checked");
       form.querySelectorAll("input[name=p" + n + "]").forEach(function (inp) {
         inp.disabled = true;
@@ -279,10 +371,18 @@
  
     function calificar() {
       var aciertos = 0, sinResponder = 0;
-      preguntas.forEach(function (p, n) {
-        var marcada = form.querySelector("input[name=p" + n + "]:checked");
-        if (!marcada) sinResponder++;
-        else if (marcada.value === p[1]) aciertos++;
+      detalle.innerHTML = "";
+      secciones.forEach(function (s) {
+        var ok = 0;
+        s[1].forEach(function (n) {
+          var m = form.querySelector("input[name=p" + n + "]:checked");
+          if (!m) sinResponder++;
+          else if (m.value === preguntas[n][1]) { ok++; aciertos++; }
+        });
+        if (!s[1].length) return;
+        var li = document.createElement("li");
+        li.textContent = s[0] + ": " + ok + " de " + s[1].length;
+        detalle.appendChild(li);
       });
       resultado.textContent = "Puntaje: " + aciertos + " de " + preguntas.length +
         (sinResponder ? " (" + sinResponder + " sin responder)" : "");
@@ -298,4 +398,3 @@
   </script>
 </body>
 </html>
- 
